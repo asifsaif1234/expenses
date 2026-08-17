@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
@@ -8,14 +10,14 @@ class ApplicationController < ActionController::Base
   helper_method :user_signed_in?
 
   protected
-  
+
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name, :last_name])
-    devise_parameter_sanitizer.permit(:account_update, keys: [:first_name, :last_name, :avatar])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :first_name, :last_name ])
+    devise_parameter_sanitizer.permit(:account_update, keys: [ :first_name, :last_name, :avatar ])
   end
 
   def turbo_request?
-    request.headers["Turbo-Frame"].present? || 
+    request.headers["Turbo-Frame"].present? ||
     request.headers["Accept"]&.include?("text/vnd.turbo-stream.html")
   end
 
@@ -25,17 +27,17 @@ class ApplicationController < ActionController::Base
       render turbo_stream: [
         turbo_stream.prepend("resources_list", partial: resource),
         turbo_stream.replace("flash_messages", partial: "shared/flash"),
-        turbo_stream.replace("#{resource.class.name.underscore}_form", 
-                            partial: "form", 
-                            locals: { resource.class.name.underscore.to_sym => resource.class.new })
+        turbo_stream.replace("#{resource.class.name.underscore}_form",
+                            partial: "form",
+                            locals: { resource.class.name.underscore.to_sym => resource.class.new }),
       ]
     else
       flash.now[:alert] = options[:alert] || "Failed to create #{resource.class.name}."
       render turbo_stream: [
-        turbo_stream.replace("#{resource.class.name.underscore}_form", 
-                            partial: "form", 
+        turbo_stream.replace("#{resource.class.name.underscore}_form",
+                            partial: "form",
                             locals: { resource.class.name.underscore.to_sym => resource }),
-        turbo_stream.replace("flash_messages", partial: "shared/flash")
+        turbo_stream.replace("flash_messages", partial: "shared/flash"),
       ], status: :unprocessable_entity
     end
   end

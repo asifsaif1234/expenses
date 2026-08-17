@@ -1,3 +1,5 @@
+inherit_from: .rubocop_todo.yml
+
 # Omakase Ruby styling for Rails
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
@@ -6,3 +8,152 @@ inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
+
+# Exclude certain files/directories
+AllCops:
+  Exclude:
+    - 'bin/**/*'
+    - 'db/schema.rb'
+    - 'db/seeds.rb'
+    - 'config/**/*'
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'log/**/*'
+    - 'node_modules/**/*'
+    - 'public/**/*'
+    - 'storage/**/*'
+    - '**/templates/**/*'
+
+# Line length - adjust as needed
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
+
+# Method length - adjust based on your preferences
+Metrics/MethodLength:
+  Max: 15
+  Exclude:
+    - 'db/migrate/**/*'
+
+# Class length
+Metrics/ClassLength:
+  Max: 200
+
+# Block length - useful for specs
+Metrics/BlockLength:
+  Max: 25
+  Exclude:
+    - 'Rakefile'
+    - '**/*.rake'
+    - 'spec/**/*.rb'
+    - 'config/**/*.rb'
+    - 'db/migrate/**/*'
+
+# Documentation - Omakase enables this by default
+Style/Documentation:
+  Enabled: false  # Disable if you don't want to document every class
+
+# String literals - Omakase uses double quotes
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+# Frozen string literal comment - Omakase enables this
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+# Hash syntax - Omakase uses Ruby 1.9 style
+Style/HashSyntax:
+  EnforcedStyle: ruby19_no_mixed_keys
+
+# Trailing commas - Omakase uses trailing commas
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+# Rails specific
+Rails:
+  Enabled: true
+
+# Active Record validations
+Rails/Validation:
+  Enabled: true
+
+# Has many or has one dependent
+Rails/HasManyOrHasOneDependent:
+  Enabled: true
+
+# Inverse of associations
+Rails/InverseOf:
+  Enabled: true
+
+# Save bang methods
+Rails/SaveBang:
+  Enabled: true
+
+# Time zone aware
+Rails/TimeZone:
+  Enabled: true
+
+# Performance cops
+Performance:
+  Enabled: true
+  Exclude:
+    - 'db/migrate/**/*'
+
+# RSpec (disable if not using RSpec)
+# RSpec:
+#   Enabled: false
+
+# ============ Custom Project Rules ============
+
+# Allow certain patterns
+Style/ClassAndModuleChildren:
+  Enabled: false  # Allow nested and compact style
+
+# Allow rescue modifier
+Style/RescueModifier:
+  Enabled: true
+
+# Use guard clause
+Style/GuardClause:
+  Enabled: true
+  MinBodyLength: 3
+
+# Allow global variables (sometimes needed)
+Style/GlobalVars:
+  Enabled: false
+
+# Allow optional boolean parameters
+Style/OptionalBooleanParameter:
+  Enabled: true
+
+# Prefer `each` over `map` when not using return value
+Style/CollectionMethods:
+  Enabled: true
+
+# Allow `and` and `or` in certain contexts
+Style/AndOr:
+  Enabled: false
+
+# Redundant return
+Style/RedundantReturn:
+  Enabled: true
+
+# Redundant self
+Style/RedundantSelf:
+  Enabled: true
+
+# Prefer `%w` for arrays of strings
+Style/WordArray:
+  EnforcedStyle: brackets
+
+# Prefer `%i` for arrays of symbols
+Style/SymbolArray:
+  EnforcedStyle: brackets
