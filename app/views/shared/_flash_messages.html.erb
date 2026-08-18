@@ -1,0 +1,27 @@
+<!-- app/views/shared/_flash_messages.html.erb -->
+<% if flash[:notice] %>
+  <div class="mb-4 p-4 bg-green-500/20 border border-green-400/30 rounded-xl text-green-100 text-sm flex items-start gap-2 animate-fade-in" data-controller="flash" data-flash-target="message">
+    <span class="text-green-300 mt-0.5">✅</span>
+    <span><%= flash[:notice] %></span>
+    <button type="button" class="ml-auto text-green-300 hover:text-green-100" data-action="click->flash#dismiss">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+<% end %>
+
+<% if flash[:alert] %>
+  <div class="mb-4 p-4 bg-red-500/20 border border-red-400/30 rounded-xl text-red-100 text-sm flex items-start gap-2 animate-fade-in" data-controller="flash" data-flash-target="message">
+    <span class="text-red-300 mt-0.5">⚠️</span>
+    <span><%= flash[:alert] %></span>
+    <button type="button" class="ml-auto text-red-300 hover:text-red-100" data-action="click->flash#dismiss">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+<% end %>
+
+<% if flash[:success] %>
+  <div class="mb-4 p-4 bg-green-500/20 border border-green-400/30 rounded-xl text-green-100 text-sm flex items-start gap-2 animate-fade-in">
+    <span class="text-green-300 mt-0.5">🎉</span>
+    <span><%= flash[:success] %></span>
+  </div>
+<% end %>

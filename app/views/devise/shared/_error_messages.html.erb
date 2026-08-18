@@ -1,0 +1,19 @@
+
+<!-- app/views/devise/shared/_error_messages.html.erb -->
+<% if resource.errors.any? %>
+  <div class="mb-4 p-4 bg-yellow-500/20 border border-yellow-400/30 rounded-xl text-yellow-100 text-sm animate-fade-in">
+    <div class="flex items-start gap-2">
+      <span class="text-yellow-300 mt-0.5">⚠️</span>
+      <div>
+        <strong class="font-semibold">
+          <%= pluralize(resource.errors.count, "error") %> prohibited this account from being saved:
+        </strong>
+        <ul class="mt-1 list-disc list-inside space-y-0.5">
+          <% resource.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+<% end %>
