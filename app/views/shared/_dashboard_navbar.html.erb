@@ -1,0 +1,166 @@
+<!-- app/views/shared/_dashboard_navbar.html.erb -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-100 transition-all duration-300" data-controller="navigation">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo - Always clickable, redirects to dashboard for logged-in users -->
+      <%= link_to dashboard_path, class: "flex items-center gap-2 hover:opacity-80 transition-opacity" do %>
+        <span class="text-2xl">💰</span>
+        <span class="text-xl font-bold text-gray-900">Expense Tracker</span>
+      <% end %>
+
+      <!-- Desktop Navigation (Dashboard) -->
+      <div class="hidden md:flex items-center gap-6">
+        <%= link_to dashboard_path, class: "flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors #{'text-gray-900 font-semibold' if current_page?(dashboard_path)}" do %>
+          <i class="fas fa-chart-pie"></i>
+          <span class="text-sm font-medium">Dashboard</span>
+        <% end %>
+        
+        <%= link_to expenses_path, class: "flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors #{'text-gray-900 font-semibold' if current_page?(expenses_path)}" do %>
+          <i class="fas fa-wallet"></i>
+          <span class="text-sm font-medium">Expenses</span>
+        <% end %>
+        
+        <%= link_to categories_path, class: "flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors #{'text-gray-900 font-semibold' if current_page?(categories_path)}" do %>
+          <i class="fas fa-tags"></i>
+          <span class="text-sm font-medium">Categories</span>
+        <% end %>
+        
+        <%= link_to report_expenses_path, class: "flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors #{'text-gray-900 font-semibold' if current_page?(report_expenses_path)}" do %>
+          <i class="fas fa-chart-bar"></i>
+          <span class="text-sm font-medium">Reports</span>
+        <% end %>
+      </div>
+
+      <!-- User Actions -->
+      <div class="flex items-center gap-3">
+        <!-- Add Expense Button -->
+        <%= link_to new_expense_path, class: "hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-md" do %>
+          <i class="fas fa-plus"></i>
+          <span>Add Expense</span>
+        <% end %>
+
+        <!-- User Menu Dropdown -->
+        <div class="relative" data-navigation-target="userMenuContainer">
+          <button class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors" data-action="click->navigation#toggleUserMenu">
+            <div class="w-8 h-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+              <%= current_user&.full_name&.first&.upcase || current_user&.email&.first&.upcase || "U" %>
+            </div>
+            <span class="hidden lg:inline text-sm font-medium text-gray-700">
+              <%= current_user&.full_name || current_user&.email&.split('@')&.first %>
+            </span>
+            <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-1 overflow-hidden" data-navigation-target="userMenu">
+            <!-- User Info -->
+            <div class="px-4 py-3 border-b border-gray-100">
+              <p class="text-sm font-semibold text-gray-900"><%= current_user&.full_name || "User" %></p>
+              <p class="text-xs text-gray-500"><%= current_user&.email %></p>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="py-1">
+              <%= link_to dashboard_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+                <i class="fas fa-chart-pie text-gray-400 w-4"></i>
+                Dashboard
+              <% end %>
+              
+              <%= link_to expenses_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+                <i class="fas fa-wallet text-gray-400 w-4"></i>
+                My Expenses
+              <% end %>
+              
+              <%= link_to categories_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+                <i class="fas fa-tags text-gray-400 w-4"></i>
+                Categories
+              <% end %>
+              
+              <%= link_to report_expenses_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+                <i class="fas fa-chart-bar text-gray-400 w-4"></i>
+                Reports
+              <% end %>
+            </div>
+
+            <div class="border-t border-gray-100 py-1">
+              <%= link_to edit_user_registration_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+                <i class="fas fa-cog text-gray-400 w-4"></i>
+                Settings
+              <% end %>
+              
+              <%= link_to profile_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+                <i class="fas fa-user text-gray-400 w-4"></i>
+                Profile
+              <% end %>
+            </div>
+
+            <!-- Sign Out Button -->
+            <div class="border-t border-gray-100 py-1">
+              <%= button_to destroy_user_session_path, method: :delete, class: "flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" do %>
+                <i class="fas fa-sign-out-alt text-red-400 w-4"></i>
+                Sign Out
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors" data-action="click->navigation#toggleMobileMenu">
+          <i class="fas fa-bars text-gray-600 text-xl"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="md:hidden hidden py-4 border-t border-gray-100" data-navigation-target="mobileMenu">
+      <div class="flex flex-col gap-2">
+        <!-- Mobile Navigation Links -->
+        <%= link_to dashboard_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+          <i class="fas fa-chart-pie w-4"></i>
+          Dashboard
+        <% end %>
+        
+        <%= link_to expenses_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+          <i class="fas fa-wallet w-4"></i>
+          Expenses
+        <% end %>
+        
+        <%= link_to categories_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+          <i class="fas fa-tags w-4"></i>
+          Categories
+        <% end %>
+        
+        <%= link_to report_expenses_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+          <i class="fas fa-chart-bar w-4"></i>
+          Reports
+        <% end %>
+        
+        <hr class="border-gray-100 my-1">
+        
+        <!-- Mobile Add Expense -->
+        <%= link_to new_expense_path, class: "flex items-center gap-3 py-2 px-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors" do %>
+          <i class="fas fa-plus w-4"></i>
+          Add Expense
+        <% end %>
+        
+        <hr class="border-gray-100 my-1">
+        
+        <%= link_to edit_user_registration_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+          <i class="fas fa-cog w-4"></i>
+          Settings
+        <% end %>
+        
+        <%= link_to profile_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+          <i class="fas fa-user w-4"></i>
+          Profile
+        <% end %>
+        
+        <!-- Mobile Sign Out -->
+        <%= button_to destroy_user_session_path, method: :delete, class: "flex items-center gap-3 w-full text-left py-2 px-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors" do %>
+          <i class="fas fa-sign-out-alt w-4"></i>
+          Sign Out
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>
