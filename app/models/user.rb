@@ -12,6 +12,10 @@ class User < ApplicationRecord
 
   validates :first_name, presence: true, if: -> { first_name.present? }
 
+  def full_name
+    "#{first_name} #{last_name}".strip
+  end
+
   def total_expenses
     expenses.sum(:amount)
   end

@@ -15,8 +15,16 @@ Rails.application.routes.draw do
     get 'sign_out', to: 'devise/sessions#destroy'
   end
 
+  root to: "home#index"
+
   # ============ Health Check ============
   get "up" => "rails/health#show", as: :rails_health_check
+
+  get 'dashboard', to: 'dashboard#index'
+  
+  authenticated :user do
+    root to: "dashboard#index", as: :authenticated_root
+  end
 
   resources :categories do
     member do
