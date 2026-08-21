@@ -3,7 +3,6 @@
 require "test_helper"
 
 class DashboardControllerTest < ActionDispatch::IntegrationTest
-
   test "should get index" do
     skip "Skipping due to fixture issues - fix fixtures first"
     get dashboard_url
