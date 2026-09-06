@@ -6,22 +6,25 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
+# test/fixtures/categories.yml (already updated in PR, verify this)
 one:
   id: 980190962
-  name: "Groceries"  # Add name value
+  name: "Groceries"
   color: "#6c757d"
   icon: "📌"
   is_active: true
   is_system: false
+  user: one
   created_at: 2026-09-06 10:54:01.668549
   updated_at: 2026-09-06 10:54:01.668549
 
 two:
   id: 298486374
-  name: "Transport"  # Add name value
+  name: "Transport"
   color: "#6c757d"
   icon: "📌"
   is_active: true
   is_system: false
+  user: one
   created_at: 2026-09-06 10:54:01.668549
   updated_at: 2026-09-06 10:54:01.668549
