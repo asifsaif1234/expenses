@@ -7,7 +7,7 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
     get home_index_url
     assert_response :success
   end
-  
+
   # Optional: Test authenticated flow
   test "should redirect to expenses for signed-in user" do
     user = users(:one)
