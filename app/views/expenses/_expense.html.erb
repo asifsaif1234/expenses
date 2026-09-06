@@ -1,0 +1,20 @@
+<!-- app/views/expenses/_expense.html.erb -->
+<div class="flex items-center justify-between py-3 hover:bg-gray-50 px-2 rounded-lg transition-colors">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl flex items-center justify-center <%= expense.amount > 0 ? 'bg-green-50' : 'bg-gray-50' %>">
+      <span class="text-xl"><%= expense.category&.icon || "📌" %></span>
+    </div>
+    <div>
+      <p class="text-sm font-medium text-gray-900"><%= expense.description.presence || "No description" %></p>
+      <div class="flex items-center gap-2 mt-0.5">
+        <span class="text-xs text-gray-500"><%= expense.expense_date.strftime("%b %d, %Y") %></span>
+        <span class="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
+          <%= expense.category&.name || "Uncategorized" %>
+        </span>
+      </div>
+    </div>
+  </div>
+  <span class="text-sm font-semibold <%= expense.amount > 0 ? 'text-green-600' : 'text-red-600' %>">
+    <%= expense.amount > 0 ? '+' : '' %>$<%= number_with_precision(expense.amount, precision: 2) %>
+  </span>
+</div>

@@ -21,7 +21,7 @@ class Users::SessionsController < Devise::SessionsController
       flash[:notice] = "Welcome back, #{user.full_name || user.email}!"
 
       # Redirect to dashboard
-      redirect_to dashboard_path and return
+      redirect_to expenses_path and return
     else
       # Invalid credentials
       flash[:alert] = "Invalid email or password. Please try again."
@@ -41,7 +41,7 @@ class Users::SessionsController < Devise::SessionsController
   protected
 
   def after_sign_in_path_for(resource)
-    dashboard_path
+    expenses_path
   end
 
   def after_sign_out_path_for(resource_or_scope)

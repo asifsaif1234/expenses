@@ -1,0 +1,198 @@
+<!-- app/views/expenses/index.html.erb -->
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">
+        <i class="fas fa-wallet text-indigo-600 mr-2"></i>Expenses
+      </h1>
+      <p class="text-sm text-gray-500">Manage and track all your transactions</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+        <i class="fas fa-circle text-green-500 mr-1 text-xs"></i>
+        <%= Date.today.strftime("%B %Y") %>
+      </span>
+      <button type="button" class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200" data-controller="modal-trigger" data-action="click->modal-trigger#open" data-modal-trigger-url="<%=new_expense_path %>">
+        <i class="fas fa-plus"></i>
+        <span>Add Expense</span>
+     </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Total Balance -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">Total Balance</p>
+          <p class="text-2xl font-bold <%= @net_total >= 0 ? 'text-green-600' : 'text-red-600' %> mt-1">
+            $<%= number_with_precision(@net_total, precision: 2) %>
+          </p>
+          <p class="text-xs text-gray-400"><%= pluralize(@expenses.count, "transaction") %></p>
+        </div>
+        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-wallet text-blue-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Income -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">Total Income</p>
+          <p class="text-2xl font-bold text-green-600 mt-1">
+            $<%= number_with_precision(@total_income, precision: 2) %>
+          </p>
+          <p class="text-xs text-gray-400"><%= pluralize(@expenses.where("amount > 0").count, "income") %></p>
+        </div>
+        <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-arrow-up text-green-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Expenses -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">Total Expenses</p>
+          <p class="text-2xl font-bold text-red-600 mt-1">
+            $<%= number_with_precision(@total_expenses, precision: 2) %>
+          </p>
+          <p class="text-xs text-gray-400"><%= pluralize(@expenses.where("amount < 0").count, "expense") %></p>
+        </div>
+        <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-arrow-down text-red-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Month -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">This Month</p>
+          <p class="text-2xl font-bold <%= @current_month_total >= 0 ? 'text-green-600' : 'text-red-600' %> mt-1">
+            $<%= number_with_precision(@current_month_total, precision: 2) %>
+          </p>
+          <p class="text-xs text-gray-400"><%= pluralize(@current_month_expenses.count, "transaction") %></p>
+        </div>
+        <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-calendar-alt text-purple-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Breakdown & Expenses List -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Category Breakdown -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 sticky top-20">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="fas fa-chart-pie text-indigo-600"></i>
+          Category Breakdown
+        </h3>
+        
+        <% if @category_totals.any? %>
+          <div class="space-y-3">
+            <% @category_totals.each do |name, data| %>
+              <% percentage = (@total_expenses > 0 ? (data[:amount] / @total_expenses * 100) : 0) %>
+              <div>
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-700 flex items-center gap-1">
+                    <span><%= data[:icon] || "📌" %></span>
+                    <%= name %>
+                  </span>
+                  <span class="font-medium text-gray-900">$<%= number_with_precision(data[:amount], precision: 2) %></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                  <div class="h-1.5 rounded-full transition-all duration-500" 
+                       style="width: <%= [percentage, 100].min %>% background-color: <%= data[:color] || '#3b82f6' %>"></div>
+                </div>
+                <span class="text-xs text-gray-400"><%= number_with_precision(percentage, precision: 1) %>%</span>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-gray-400">
+            <i class="fas fa-inbox text-3xl block mb-2"></i>
+            <p>No expenses to categorize</p>
+          </div>
+        <% end %>
+        
+        <!-- Quick Stats -->
+        <div class="mt-6 pt-6 border-t border-gray-100">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="text-center p-3 bg-gray-50 rounded-lg">
+              <p class="text-xs text-gray-500">Average Daily</p>
+              <p class="text-lg font-bold text-gray-900">
+                $<%= number_with_precision(@expenses.where("amount < 0").average(:amount)&.abs.to_f, precision: 2) %>
+              </p>
+            </div>
+            <div class="text-center p-3 bg-gray-50 rounded-lg">
+              <p class="text-xs text-gray-500">Avg Transaction</p>
+              <p class="text-lg font-bold text-gray-900">
+                $<%= number_with_precision(@expenses.average(:amount).to_f.abs, precision: 2) %>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expenses List -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- Table Header -->
+        <div class="bg-gray-50 px-6 py-3 border-b border-gray-100">
+          <div class="grid grid-cols-12 gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <div class="col-span-4">Description</div>
+            <div class="col-span-3">Category</div>
+            <div class="col-span-3">Date</div>
+            <div class="col-span-2 text-right">Amount</div>
+          </div>
+        </div>
+
+        <!-- Expenses List -->
+        <div class="divide-y divide-gray-100" id="expenses_list">
+          <% if @expenses.any? %>
+            <% @expenses.each do |expense| %>
+              <%= render "expense", expense: expense %>
+            <% end %>
+          <% else %>
+            <div class="text-center py-12 text-gray-400">
+              <i class="fas fa-inbox text-4xl block mb-3 text-gray-300"></i>
+              <p class="text-lg font-medium text-gray-500">No expenses yet</p>
+              <p class="text-sm">Start tracking your expenses by adding one!</p>
+              <%= link_to new_expense_path, 
+                  class: "mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors",
+                  data: { 
+                    turbo_frame: "modal_frame",
+                    action: "click->modal-trigger#open"
+                  } do %>
+                <i class="fas fa-plus"></i>
+                Add Your First Expense
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Pagination Footer -->
+        <% if @expenses.any? %>
+          <div class="bg-gray-50 px-6 py-3 border-t border-gray-100 flex justify-between items-center">
+            <span class="text-sm text-gray-500">
+              Showing <span class="font-medium"><%= @expenses.count %></span> transactions
+            </span>
+            <span class="text-sm text-gray-500">
+              Total: <span class="font-bold text-gray-900">$<%= number_with_precision(@total_expenses, precision: 2) %></span>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
