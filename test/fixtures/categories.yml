@@ -8,7 +8,6 @@
 #
 # test/fixtures/categories.yml (already updated in PR, verify this)
 one:
-  id: 980190962
   name: "Groceries"
   color: "#6c757d"
   icon: "📌"
@@ -19,7 +18,6 @@ one:
   updated_at: 2026-09-06 10:54:01.668549
 
 two:
-  id: 298486374
   name: "Transport"
   color: "#6c757d"
   icon: "📌"

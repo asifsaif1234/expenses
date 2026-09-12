@@ -27,15 +27,7 @@ export default class extends Controller {
   }
   
   closeModal() {
-    const modalElement = document.querySelector('[data-controller="modal"]')
-    if (modalElement) {
-      const modalController = this.application.getControllerForElementAndIdentifier(
-        modalElement, 
-        'modal'
-      )
-      if (modalController) {
-        setTimeout(() => modalController.close(), 500)
-      }
-    }
+    // CHANGED: Use custom event instead of direct controller access
+    document.dispatchEvent(new CustomEvent("modal:close"))
   }
 }

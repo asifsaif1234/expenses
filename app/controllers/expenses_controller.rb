@@ -6,7 +6,6 @@ class ExpensesController < ApplicationController
   # before_action :set_expense, only: [ :edit, :update, :destroy]
   before_action :set_categories, only: [ :new, :create ]
 
-  # app/controllers/expenses_controller.rb
   def index
     # Get all expenses
     @expenses = current_user.expenses
@@ -52,44 +51,33 @@ class ExpensesController < ApplicationController
            layout: false
   end
 
-  # POST /expenses
   def create
     @expense = current_user.expenses.new(expense_params)
     @categories = current_user.available_categories
-
-    if valid_category?
-      if @expense.save
-        respond_to do |format|
-          format.html { redirect_to expenses_path, notice: "Expense created successfully." }
-          format.turbo_stream do
-            flash.now[:notice] = "Expense added successfully!"
-            render turbo_stream: [
-              turbo_stream.prepend("expenses_list", partial: "expense", locals: { expense: @expense }),
-              turbo_stream.replace("flash_messages", partial: "shared/flash"),
-              turbo_stream.invoke("modal", "close"),
-            ]
-          end
-        end
-      else
-        respond_to do |format|
-          format.html { render :new, status: :unprocessable_entity }
-          format.turbo_stream do
-            render turbo_stream: [
-              turbo_stream.replace("modal_frame",
-                                   partial: "expenses/modal_form",
-                                   locals: { expense: @expense, categories: @categories }),
-            ], status: :unprocessable_entity
-          end
+    
+    if valid_category? && @expense.save
+      flash[:notice] = "Expense added successfully!"
+      
+      respond_to do |format|
+        format.html { redirect_to expenses_path }
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.prepend("expenses_list", 
+                                 partial: "expense", 
+                                 locals: { expense: @expense }),
+            turbo_stream.replace("flash_messages", 
+                                 partial: "shared/flash")
+          ]
         end
       end
     else
-      @expense.errors.add(:category, "must be a valid category")
       respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
         format.turbo_stream do
           render turbo_stream: [
-            turbo_stream.replace("modal_frame",
-                                 partial: "expenses/modal_form",
-                                 locals: { expense: @expense, categories: @categories }),
+            turbo_stream.replace("modal_content", 
+                                 partial: "expenses/modal_form", 
+                                 locals: { expense: @expense, categories: @categories })
           ], status: :unprocessable_entity
         end
       end

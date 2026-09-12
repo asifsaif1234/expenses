@@ -8,10 +8,14 @@ export default class extends Controller {
   connect() {
     console.log("✅ Modal controller connected")
     document.addEventListener("keydown", this.handleEscape.bind(this))
+    
+    // NEW: Listen for custom modal:close events
+    document.addEventListener("modal:close", this.handleCloseEvent.bind(this))
   }
   
   disconnect() {
     document.removeEventListener("keydown", this.handleEscape.bind(this))
+    document.removeEventListener("modal:close", this.handleCloseEvent.bind(this))
   }
   
   open() {
@@ -35,6 +39,12 @@ export default class extends Controller {
       document.body.style.overflow = ""
       this.openValue = false
     }, 300)
+  }
+  
+  // NEW: Handle custom close event
+  handleCloseEvent(event) {
+    console.log("📩 Received modal:close event")
+    this.close()
   }
   
   handleEscape(event) {
