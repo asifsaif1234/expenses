@@ -18,11 +18,13 @@ Rails.application.routes.draw do
   # ============ Health Check ============
   get "up" => "rails/health#show", as: :rails_health_check
 
+   # Public routes
+  get 'home/index', as: :home_index
+  root to: "home#index"
+
   authenticated :user do
     root to: "expenses#index", as: :authenticated_root
   end
-
-  root to: "home#index"
 
   resources :categories do
     member do

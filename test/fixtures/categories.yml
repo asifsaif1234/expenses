@@ -7,6 +7,8 @@
 # below each fixture, per the syntax in the comments below
 #
 # test/fixtures/categories.yml (already updated in PR, verify this)
+# frozen_string_literal: true
+
 one:
   name: "Groceries"
   color: "#6c757d"

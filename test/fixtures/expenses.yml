@@ -7,22 +7,26 @@
 # below each fixture, per the syntax in the comments below
 #
 # test/fixtures/expenses.yml
+# frozen_string_literal: true
+
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# Expenses fixtures must reference valid user and category fixtures
+
 one:
-  id: 980190962
   amount: 50.00
   expense_date: 2026-09-06
-  description: "Test groceries"
+  description: "Grocery shopping"
   category: one
-  user: 1
+  user: one
   created_at: 2026-09-06 10:54:01.668549
   updated_at: 2026-09-06 10:54:01.668549
 
 two:
-  id: 980190963
   amount: 25.50
   expense_date: 2026-09-05
-  description: "Test transport"
+  description: "Bus fare"
   category: two
-  user: 1
+  user: one
   created_at: 2026-09-06 10:54:01.668549
   updated_at: 2026-09-06 10:54:01.668549
+
