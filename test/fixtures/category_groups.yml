@@ -6,8 +6,23 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+one:
+  name: "Income"
+  icon: "💰"
+  position: 1
+  is_system: true
+  is_active: true
+
+two:
+  name: "Expenses"
+  icon: "📁"
+  position: 2
+  is_system: true
+  is_active: true
+
+three:
+  name: "Groceries"
+  icon: "🛒"
+  position: 3
+  is_system: false
+  is_active: true

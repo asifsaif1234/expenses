@@ -8,26 +8,14 @@ class Users::SessionsController < Devise::SessionsController
     super
   end
 
-  # POST /resource/sign_in
   def create
-    # Try to authenticate the user
-    user = User.find_by(email: params[:user][:email])
-
-    if user && user.valid_password?(params[:user][:password])
-      # Sign in the user
-      sign_in(:user, user)
-
-      # Set flash message
-      flash[:notice] = "Welcome back, #{user.full_name || user.email}!"
-
-      # Redirect to dashboard
-      redirect_to dashboard_path and return
-    else
-      # Invalid credentials
-      flash[:alert] = "Invalid email or password. Please try again."
-
-      # Re-render sign in form
-      render :new, status: :unprocessable_entity
+    # Let Devise handle authentication
+    super do |resource|
+      # Custom logic after successful sign in
+      if resource.persisted?
+        flash[:notice] = "Welcome back, #{resource.full_name || resource.email}!"
+        redirect_to expenses_path and return
+      end
     end
   end
 
@@ -41,7 +29,7 @@ class Users::SessionsController < Devise::SessionsController
   protected
 
   def after_sign_in_path_for(resource)
-    dashboard_path
+    expenses_path
   end
 
   def after_sign_out_path_for(resource_or_scope)

@@ -1,0 +1,7 @@
+<!-- app/views/expenses/create.turbo_stream.erb -->
+<%= turbo_stream.prepend "expenses_list", partial: "expenses/expense", locals: { expense: @expense } %>
+<%= turbo_stream.replace "flash_messages", partial: "shared/flash" %>
+<%= turbo_stream.invoke "modal", "close" %>
+
+<!-- If you want to update stats -->
+<%= turbo_stream.replace "total_expenses", partial: "expenses/total_stats", locals: { total: current_user.total_expenses } %>

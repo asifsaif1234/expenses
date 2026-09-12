@@ -1,0 +1,340 @@
+<!-- app/views/expenses/dashboard.html.erb -->
+<div class="space-y-6">
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">
+        <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>Dashboard
+      </h1>
+      <p class="text-sm text-gray-500">Welcome back! Here's your financial overview.</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full">
+        <i class="fas fa-circle text-green-500 mr-1 text-xs"></i>
+        <%= @current_month %>
+      </span>
+      <button type="button"
+              class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+              data-controller="modal-trigger"
+              data-action="click->modal-trigger#open"
+              data-modal-trigger-url="<%= new_expense_path %>">
+        <i class="fas fa-plus mr-1"></i> Add Expense
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Total Balance -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">Total Balance</p>
+          <p class="text-2xl font-bold text-gray-900 mt-1">$<%= number_with_precision(@stats[:total_balance][:value], precision: 2) %></p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+              <i class="fas fa-arrow-up mr-0.5"></i> <%= @stats[:total_balance][:change] %>%
+            </span>
+            <span class="text-xs text-gray-400">vs last month</span>
+          </div>
+        </div>
+        <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-wallet text-blue-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Income -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">Monthly Income</p>
+          <p class="text-2xl font-bold text-green-600 mt-1">$<%= number_with_precision(@stats[:monthly_income][:value], precision: 2) %></p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+              <i class="fas fa-arrow-up mr-0.5"></i> <%= @stats[:monthly_income][:change] %>%
+            </span>
+            <span class="text-xs text-gray-400">vs last month</span>
+          </div>
+        </div>
+        <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-arrow-up text-green-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Expenses -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">Monthly Expenses</p>
+          <p class="text-2xl font-bold text-red-600 mt-1">$<%= number_with_precision(@stats[:monthly_expenses][:value], precision: 2) %></p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-xs text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
+              <i class="fas fa-arrow-down mr-0.5"></i> <%= @stats[:monthly_expenses][:change].abs %>%
+            </span>
+            <span class="text-xs text-gray-400">vs last month</span>
+          </div>
+        </div>
+        <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-arrow-down text-red-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Savings Rate -->
+    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-md transition-shadow">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500 font-medium">Savings Rate</p>
+          <p class="text-2xl font-bold text-purple-600 mt-1"><%= @stats[:savings_rate][:value] %>%</p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+              <i class="fas fa-arrow-up mr-0.5"></i> <%= @stats[:savings_rate][:change] %>%
+            </span>
+            <span class="text-xs text-gray-400">vs last month</span>
+          </div>
+        </div>
+        <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+          <i class="fas fa-piggy-bank text-purple-600 text-xl"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Monthly Trend Chart -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Monthly Trend</h3>
+          <p class="text-xs text-gray-500">Last 12 months</p>
+        </div>
+        <div class="flex flex-wrap gap-3 text-xs">
+          <span class="inline-flex items-center gap-1 text-green-600">
+            <span class="w-2 h-2 bg-green-500 rounded-full"></span> Income
+          </span>
+          <span class="inline-flex items-center gap-1 text-red-600">
+            <span class="w-2 h-2 bg-red-500 rounded-full"></span> Expenses
+          </span>
+          <span class="inline-flex items-center gap-1 text-blue-600">
+            <span class="w-2 h-2 bg-blue-500 rounded-full"></span> Savings
+          </span>
+        </div>
+      </div>
+      <div class="h-72 relative">
+        <canvas id="monthlyTrendChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Category Breakdown Chart -->
+    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Category Breakdown</h3>
+          <p class="text-xs text-gray-500"><%= @current_month %></p>
+        </div>
+        <span class="text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
+          Total: $<%= number_with_precision(@monthly_expenses_total, precision: 2) %>
+        </span>
+      </div>
+      <div class="h-72 relative">
+        <canvas id="categoryBreakdownChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    <div class="flex justify-between items-center mb-4">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900">Recent Transactions</h3>
+        <p class="text-xs text-gray-500">Your latest transactions</p>
+      </div>
+      <%= link_to expenses_path, class: "text-sm text-indigo-600 hover:text-indigo-700 transition-colors" do %>
+        View All <i class="fas fa-arrow-right ml-1"></i>
+      <% end %>
+    </div>
+    <div class="divide-y divide-gray-100">
+      <% @recent_transactions.each do |transaction| %>
+        <div class="flex items-center justify-between py-3 hover:bg-gray-50 px-2 rounded-lg transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center <%#= transaction.amount > 0 ? 'bg-green-50' : 'bg-gray-50' %>">
+              <span class="text-xl"><%#= transaction.category&.icon || "📌" %></span>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-gray-900"><%#= transaction.description.presence || "No description" %></p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-xs text-gray-500"><%#= transaction.expense_date.strftime("%b %d, %Y") %></span>
+                <span class="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-600">
+                  <%#= transaction.category&.name || "Uncategorized" %>
+                </span>
+              </div>
+            </div>
+          </div>
+          <span class="text-sm font-semibold <%#= transaction.amount > 0 ? 'text-green-600' : 'text-red-600' %>">
+            <%#= transaction.amount > 0 ? '+' : '' %>$<%#= number_with_precision(transaction.amount, precision: 2) %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Charts JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Monthly Trend Chart
+    const monthlyCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+    const monthlyData = <%= @monthly_trend.to_json.html_safe %>;
+    
+    new Chart(monthlyCtx, {
+      type: 'line',
+      data: {
+        labels: monthlyData.map(d => d.month),
+        datasets: [
+          {
+            label: 'Income',
+            data: monthlyData.map(d => d.income),
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#22c55e',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          },
+          {
+            label: 'Expenses',
+            data: monthlyData.map(d => d.expenses),
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#ef4444',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4
+          },
+          {
+            label: 'Savings',
+            data: monthlyData.map(d => d.savings),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#3b82f6',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            borderDash: [5, 5]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            titleColor: '#1f2937',
+            bodyColor: '#374151',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                return context.dataset.label + ': $' + context.parsed.y.toFixed(2);
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            },
+            ticks: {
+              callback: function(value) {
+                return '$' + value;
+              }
+            }
+          },
+          x: {
+            grid: {
+              display: false
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        }
+      }
+    });
+
+    // Category Breakdown Chart
+    const categoryCtx = document.getElementById('categoryBreakdownChart').getContext('2d');
+    const categoryData = <%= @category_breakdown.to_json.html_safe %>;
+    
+    const colors = [
+      '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', 
+      '#10b981', '#ef4444', '#6366f1', '#14b8a6'
+    ];
+    
+    new Chart(categoryCtx, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(categoryData),
+        datasets: [{
+          data: Object.values(categoryData),
+          backgroundColor: colors.slice(0, Object.keys(categoryData).length),
+          borderWidth: 3,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              font: {
+                size: 11
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            titleColor: '#1f2937',
+            bodyColor: '#374151',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            padding: 12,
+            cornerRadius: 8,
+            callbacks: {
+              label: function(context) {
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                return context.label + ': $' + context.parsed.toFixed(2) + ' (' + percentage + '%)';
+              }
+            }
+          }
+        },
+        cutout: '65%'
+      }
+    });
+  });
+</script>

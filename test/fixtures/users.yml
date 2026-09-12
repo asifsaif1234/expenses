@@ -1,11 +1,18 @@
+# frozen_string_literal: true
+
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 # This model initially had no columns defined. If you add columns to the
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+# test/fixtures/users.yml
+one:
+  email: test@example.com
+  first_name: "Test"
+  last_name: "User"
+  encrypted_password: "$2a$12$K4PCKpSKSgKKVqyPcT6ode7VfEu8.A.vNMdqIRh9jVJqIiHXe4oXa"
+  confirmed_at: 2026-09-06 10:54:01.668549
+  created_at: 2026-09-06 10:54:01.668549
+  updated_at: 2026-09-06 10:54:01.668549
+

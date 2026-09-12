@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
 
   # Override Devise's after_sign_in_path_for
   def after_sign_in_path_for(resource)
-    dashboard_path
+    expenses_path
   end
 
   # Override Devise's after_sign_out_path_for

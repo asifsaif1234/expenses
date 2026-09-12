@@ -6,8 +6,25 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+# test/fixtures/categories.yml (already updated in PR, verify this)
+# frozen_string_literal: true
+
+one:
+  name: "Groceries"
+  color: "#6c757d"
+  icon: "📌"
+  is_active: true
+  is_system: false
+  user: one
+  created_at: 2026-09-06 10:54:01.668549
+  updated_at: 2026-09-06 10:54:01.668549
+
+two:
+  name: "Transport"
+  color: "#6c757d"
+  icon: "📌"
+  is_active: true
+  is_system: false
+  user: one
+  created_at: 2026-09-06 10:54:01.668549
+  updated_at: 2026-09-06 10:54:01.668549

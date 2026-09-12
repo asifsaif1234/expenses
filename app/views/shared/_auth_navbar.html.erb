@@ -1,16 +1,17 @@
 <!-- app/views/shared/_dashboard_navbar.html.erb -->
+
 <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-100 transition-all duration-300" data-controller="navigation">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <!-- Logo - Always clickable, redirects to dashboard for logged-in users -->
-      <%= link_to dashboard_path, class: "flex items-center gap-2 hover:opacity-80 transition-opacity" do %>
+      <%= link_to expenses_path, class: "flex items-center gap-2 hover:opacity-80 transition-opacity" do %>
         <span class="text-2xl">💰</span>
         <span class="text-xl font-bold text-gray-900">Expense Tracker</span>
       <% end %>
 
       <!-- Desktop Navigation (Dashboard) -->
       <div class="hidden md:flex items-center gap-6">
-        <%= link_to dashboard_path, class: "flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors #{'text-gray-900 font-semibold' if current_page?(dashboard_path)}" do %>
+        <%= link_to dashboard_expenses_path, class: "flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors #{'text-gray-900 font-semibold' if current_page?(expenses_path)}" do %>
           <i class="fas fa-chart-pie"></i>
           <span class="text-sm font-medium">Dashboard</span>
         <% end %>
@@ -34,10 +35,20 @@
       <!-- User Actions -->
       <div class="flex items-center gap-3">
         <!-- Add Expense Button -->
-        <%= link_to new_expense_path, class: "hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-md" do %>
+
+         <!-- Add Expense Button - FIXED for modal -->
+        <button type="button"
+                class="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                data-controller="modal-trigger"
+                data-action="click->modal-trigger#open"
+                data-modal-trigger-url="<%= new_expense_path %>">
           <i class="fas fa-plus"></i>
           <span>Add Expense</span>
-        <% end %>
+        </button>
+        <%#= link_to new_expense_path, class: "hidden md:flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm hover:shadow-md" do %>
+          <%# <i class="fas fa-plus"></i>
+          <span>Add Expense</span> %>
+        <%# end %>
 
         <!-- User Menu Dropdown -->
         <div class="relative" data-navigation-target="userMenuContainer">
@@ -61,7 +72,7 @@
 
             <!-- Menu Items -->
             <div class="py-1">
-              <%= link_to dashboard_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
+              <%= link_to expenses_path, class: "flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors" do %>
                 <i class="fas fa-chart-pie text-gray-400 w-4"></i>
                 Dashboard
               <% end %>
@@ -115,7 +126,7 @@
     <div class="md:hidden hidden py-4 border-t border-gray-100" data-navigation-target="mobileMenu">
       <div class="flex flex-col gap-2">
         <!-- Mobile Navigation Links -->
-        <%= link_to dashboard_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
+        <%= link_to expenses_path, class: "flex items-center gap-3 py-2 px-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors" do %>
           <i class="fas fa-chart-pie w-4"></i>
           Dashboard
         <% end %>
@@ -138,10 +149,14 @@
         <hr class="border-gray-100 my-1">
         
         <!-- Mobile Add Expense -->
-        <%= link_to new_expense_path, class: "flex items-center gap-3 py-2 px-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors" do %>
+        <button type="button"
+                class="flex items-center gap-3 py-2 px-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors w-full text-left"
+                data-controller="modal-trigger"
+                data-action="click->modal-trigger#open"
+                data-modal-trigger-url="<%= new_expense_path %>">
           <i class="fas fa-plus w-4"></i>
           Add Expense
-        <% end %>
+        </button>
         
         <hr class="border-gray-100 my-1">
         

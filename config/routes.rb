@@ -15,15 +15,15 @@ Rails.application.routes.draw do
     get 'sign_out', to: 'devise/sessions#destroy'
   end
 
-  root to: "home#index"
-
   # ============ Health Check ============
   get "up" => "rails/health#show", as: :rails_health_check
 
-  get 'dashboard', to: 'dashboard#index'
-  
+   # Public routes
+  get 'home/index', as: :home_index
+  root to: "home#index"
+
   authenticated :user do
-    root to: "dashboard#index", as: :authenticated_root
+    root to: "expenses#index", as: :authenticated_root
   end
 
   resources :categories do

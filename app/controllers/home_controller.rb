@@ -4,7 +4,7 @@ class HomeController < ApplicationController
   skip_before_action :authenticate_user!, only: [ :index ]
 
   # Use a different layout for landing page
-  layout "landing"
+  # layout "landing"
 
   def index
     # This is the main landing page

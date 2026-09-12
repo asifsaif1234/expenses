@@ -1,9 +1,90 @@
 # frozen_string_literal: true
 
-class DashboardController < ApplicationController
+# app/controllers/expenses_controller.rb
+class ExpensesController < ApplicationController
   before_action :authenticate_user!
+  # before_action :set_expense, only: [ :edit, :update, :destroy]
+  before_action :set_categories, only: [ :new, :create ]
 
   def index
+    # Get all expenses
+    @expenses = current_user.expenses
+                            .includes(:category)
+                            .order(expense_date: :desc, created_at: :desc)
+
+    # Calculate totals
+    @total_income = @expenses.sum { |e| e.amount > 0 ? e.amount : 0 }
+    @total_expenses = @expenses.sum { |e| e.amount < 0 ? -e.amount : 0 }
+    @net_total = @total_income - @total_expenses
+
+    # Category breakdown using simple Ruby iteration
+    @category_totals = {}
+    @expenses.each do |expense|
+      next if expense.amount >= 0 # Only expenses
+      next if expense.category.nil?
+
+      name = expense.category.name
+      @category_totals[name] ||= {
+        amount: 0,
+        icon: expense.category.icon || "📌",
+        color: expense.category.color || "#6c757d",
+      }
+      @category_totals[name][:amount] += expense.amount.abs
+    end
+
+    # Sort by amount
+    @category_totals = @category_totals.sort_by { |_, data| -data[:amount] }.to_h
+
+    # Current month
+    @current_month_expenses = @expenses.select { |e| e.expense_date.month == Time.zone.today.month && e.expense_date.year == Time.zone.today.year }
+    @current_month_total = @current_month_expenses.sum(&:amount)
+  end
+
+  # GET /expenses/new (for modal)
+  def new
+    @expense = Expense.new(expense_date: Time.zone.today)
+    @categories = current_user.available_categories
+
+    # Rails 8: Use render with layout: false
+    render partial: "expenses/modal_form",
+           locals: { expense: @expense, categories: @categories },
+           layout: false
+  end
+
+  def create
+    @expense = current_user.expenses.new(expense_params)
+    @categories = current_user.available_categories
+
+    if valid_category? && @expense.save
+      flash[:notice] = "Expense added successfully!"
+
+      respond_to do |format|
+        format.html { redirect_to expenses_path }
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.prepend("expenses_list",
+                                 partial: "expense",
+                                 locals: { expense: @expense }),
+            turbo_stream.replace("flash_messages",
+                                 partial: "shared/flash"),
+          ]
+        end
+      end
+    else
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("modal_content",
+                                 partial: "expenses/modal_form",
+                                 locals: { expense: @expense, categories: @categories }),
+          ], status: :unprocessable_entity
+        end
+      end
+    end
+  end
+
+  def dashboard
     # ============ STATIC DEMO DATA ============
     # This data will be replaced with real data later
 
@@ -177,5 +258,43 @@ class DashboardController < ApplicationController
       average_monthly: 1875.40,
       highest_spending: "Groceries",
     }
+  end
+
+  private
+
+  # def set_expense
+  #   @expense = current_user.expenses.find(params[:id])
+  # rescue ActiveRecord::RecordNotFound
+  #   redirect_to expenses_path, alert: "Expense not found."
+  # end
+
+  def set_categories
+    @categories = current_user.available_categories
+  end
+
+  def filter_expenses(expenses)
+    if params[:category_id].present?
+      expenses = expenses.by_category(params[:category_id])
+    end
+
+    if params[:start_date].present? && params[:end_date].present?
+      expenses = expenses.by_date_range(params[:start_date], params[:end_date])
+    end
+
+    if params[:search].present?
+      expenses = expenses.search(params[:search])
+    end
+
+    expenses
+  end
+
+  def valid_category?
+    category = Category.find_by(id: expense_params[:category_id])
+    return false if category.nil?
+    category.system_category? || category.user_id == current_user.id
+  end
+
+  def expense_params
+    params.require(:expense).permit(:amount, :expense_date, :description, :category_id)
   end
 end
