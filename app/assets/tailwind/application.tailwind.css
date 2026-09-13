@@ -3,34 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .modal-backdrop {
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-  }
-}
-
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-}
-
-/* app/assets/stylesheets/application.tailwind.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer components {
   .modal-backdrop {

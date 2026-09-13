@@ -1,0 +1,30 @@
+<!-- app/views/expenses/index.turbo_stream.erb -->
+<%# Append new expenses %>
+<%= turbo_stream.append "expenses_list" do %>
+  <%= render partial: "expense", collection: @expenses, as: :expense %>
+<% end %>
+
+<% if @pagy.next %>
+  <%# Replace sentinel with new one pointing to next page %>
+  <%= turbo_stream.replace "infinite_scroll_sentinel" do %>
+    <div id="infinite_scroll_sentinel"
+         data-controller="infinite-scroll"
+         data-infinite-scroll-next-url-value="<%= expenses_path(page: @pagy.next, month: params[:month]) %>"
+         class="h-4 w-full">
+    </div>
+  <% end %>
+<% else %>
+  <%# Last page reached: remove sentinel and loader, show end message %>
+  <%= turbo_stream.remove "infinite_scroll_sentinel" %>
+  <%= turbo_stream.remove "infinite_scroll_loading" %>
+  <%= turbo_stream.replace "infinite_scroll_end" do %>
+    <div id="infinite_scroll_end" class="bg-gray-50 px-6 py-3 border-t border-gray-200 text-center">
+      <p class="text-sm text-gray-400">
+        <i class="fas fa-check-circle mr-1"></i>
+        You've reached the end • 
+        Showing all <span class="font-semibold"><%= @pagy.count %></span> 
+        <%= "transaction".pluralize(@pagy.count) %>
+      </p>
+    </div>
+  <% end %>
+<% end %>
