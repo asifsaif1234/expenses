@@ -2,42 +2,70 @@
 
 # app/controllers/expenses_controller.rb
 class ExpensesController < ApplicationController
+  include Pagy::Backend
+
   before_action :authenticate_user!
   # before_action :set_expense, only: [ :edit, :update, :destroy]
   before_action :set_categories, only: [ :new, :create ]
 
   def index
-    # Get all expenses
-    @expenses = current_user.expenses
-                            .includes(:category)
-                            .order(expense_date: :desc, created_at: :desc)
-
-    # Calculate totals
-    @total_income = @expenses.sum { |e| e.amount > 0 ? e.amount : 0 }
-    @total_expenses = @expenses.sum { |e| e.amount < 0 ? -e.amount : 0 }
+    @selected_date = params[:month].present? ? Date.parse(params[:month]) : Date.today
+    @selected_month_start = @selected_date.beginning_of_month
+    @selected_month_end = @selected_date.end_of_month
+    
+    month_scope = current_user.expenses
+                             .where(expense_date: @selected_month_start..@selected_month_end)
+                             .includes(:category)
+                             .order(expense_date: :desc, created_at: :desc)
+    
+    # Paginate
+    @pagy, @expenses = pagy(month_scope, limit: 20)
+    
+    # Stats use full month scope
+    all_month_expenses = month_scope.to_a
+    
+    @total_income = all_month_expenses.select { |e| e.amount > 0 }.sum(&:amount)
+    @total_expenses = all_month_expenses.select { |e| e.amount < 0 }.sum { |e| -e.amount }
     @net_total = @total_income - @total_expenses
-
-    # Category breakdown using simple Ruby iteration
+    @expense_count = all_month_expenses.count { |e| e.amount < 0 }
+    @avg_daily = @total_expenses > 0 ? (@total_expenses / [Date.today.day, 1].max).round(2) : 0
+    @avg_transaction = @expense_count > 0 ? (@total_expenses / @expense_count).round(2) : 0
+    
+    # Year totals
+    year_expenses = current_user.expenses
+                                .where(expense_date: Date.today.beginning_of_year..Date.today.end_of_year)
+    @year_income = year_expenses.select { |e| e.amount > 0 }.sum(&:amount)
+    @year_expenses_total = year_expenses.select { |e| e.amount < 0 }.sum { |e| -e.amount }
+    @year_net_total = @year_income - @year_expenses_total
+    @year_transaction_count = year_expenses.count
+    
+    # Category breakdown
     @category_totals = {}
-    @expenses.each do |expense|
-      next if expense.amount >= 0 # Only expenses
+    all_month_expenses.each do |expense|
+      next if expense.amount >= 0
       next if expense.category.nil?
-
+      
       name = expense.category.name
       @category_totals[name] ||= {
         amount: 0,
         icon: expense.category.icon || "📌",
-        color: expense.category.color || "#6c757d",
+        color: expense.category.color || "#6c757d"
       }
       @category_totals[name][:amount] += expense.amount.abs
     end
-
-    # Sort by amount
     @category_totals = @category_totals.sort_by { |_, data| -data[:amount] }.to_h
-
-    # Current month
-    @current_month_expenses = @expenses.select { |e| e.expense_date.month == Time.zone.today.month && e.expense_date.year == Time.zone.today.year }
-    @current_month_total = @current_month_expenses.sum(&:amount)
+    
+    # Month navigation
+    @month_name = @selected_date.strftime("%B %Y")
+    @prev_month = @selected_date.prev_month
+    @next_month = @selected_date.next_month
+    @is_current_month = @selected_date.month == Date.today.month && @selected_date.year == Date.today.year
+    @can_go_next = @selected_date < Date.today.beginning_of_month
+    
+    respond_to do |format|
+      format.html
+      format.turbo_stream
+    end
   end
 
   # GET /expenses/new (for modal)

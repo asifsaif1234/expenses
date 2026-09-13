@@ -1,0 +1,67 @@
+<!-- app/views/expenses/_category_breakdown.html.erb -->
+<div class="lg:col-span-1">
+  <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 sticky top-20">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <i class="fas fa-chart-pie text-indigo-600"></i>
+      Category Breakdown
+      <span class="text-xs font-normal text-gray-400 ml-auto"><%= @month_name %></span>
+    </h3>
+    
+    <% if @category_totals.any? %>
+      <div class="space-y-3">
+        <% @category_totals.each do |name, data| %>
+          <% percentage = (@total_expenses > 0 ? (data[:amount] / @total_expenses * 100) : 0) %>
+          <div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-700 flex items-center gap-1">
+                <span><%= data[:icon] || "📌" %></span>
+                <%= name %>
+              </span>
+              <span class="font-medium text-gray-900 tabular-nums">
+                $<%= number_with_precision(data[:amount], precision: 2) %>
+              </span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+              <div class="h-1.5 rounded-full transition-all duration-500" 
+                   style="width: <%= [percentage, 100].min %>%; 
+                          background-color: <%= data[:color] || '#3b82f6' %>"></div>
+            </div>
+            <span class="text-xs text-gray-400"><%= number_with_precision(percentage, precision: 1) %>%</span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center py-8 text-gray-400">
+        <i class="fas fa-inbox text-3xl block mb-2"></i>
+        <p>No expenses to categorize</p>
+      </div>
+    <% end %>
+    
+    <!-- Quick Stats -->
+    <div class="mt-6 pt-6 border-t border-gray-100">
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Average Daily -->
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <p class="text-xs text-gray-500">Avg Daily</p>
+          <p class="text-lg font-bold text-gray-900 tabular-nums">
+            $<%= number_with_precision(
+              (@total_expenses > 0 ? @total_expenses / [Date.today.day, 1].max : 0).round(2), 
+              precision: 2
+            ) %>
+          </p>
+        </div>
+        
+        <!-- Average Transaction -->
+        <div class="text-center p-3 bg-gray-50 rounded-lg">
+          <p class="text-xs text-gray-500">Avg Transaction</p>
+          <p class="text-lg font-bold text-gray-900 tabular-nums">
+            $<%= number_with_precision(
+              (@expense_count.to_i > 0 ? @total_expenses / @expense_count.to_i : 0).round(2),
+              precision: 2
+            ) %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
