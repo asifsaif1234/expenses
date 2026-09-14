@@ -1,17 +1,12 @@
-<!-- app/views/expenses/_expense.html.erb -->
 <div id="<%= dom_id(expense) %>" 
      class="expense-item px-6 py-4 hover:bg-gray-50 transition-colors">
   <div class="flex items-center justify-between gap-2">
-    
-    <!-- Left: Icon + Description + Meta -->
     <div class="flex items-center gap-3 min-w-0 flex-1">
-      <!-- Category Icon -->
       <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
                   <%= expense.amount > 0 ? 'bg-green-50' : 'bg-red-50' %>">
         <span class="text-lg leading-none"><%= expense.category&.icon || "📌" %></span>
       </div>
       
-      <!-- Description + Meta -->
       <div class="min-w-0 flex-1">
         <p class="text-sm font-medium text-gray-900 truncate">
           <%= expense.description.presence || "Untitled Expense" %>
@@ -30,7 +25,6 @@
       </div>
     </div>
     
-    <!-- Right: Amount -->
     <div class="flex-shrink-0 ml-3">
       <span class="text-base font-semibold <%= expense.amount > 0 ? 'text-green-600' : 'text-red-600' %> tabular-nums">
         <%= expense.amount > 0 ? '+' : '−' %>$<%= number_with_precision(expense.amount.abs, precision: 2) %>

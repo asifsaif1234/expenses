@@ -9,58 +9,35 @@ class ExpensesController < ApplicationController
   before_action :set_categories, only: [ :new, :create ]
 
   def index
-    @selected_date = params[:month].present? ? Date.parse(params[:month]) : Time.zone.today
-    @selected_month_start = @selected_date.beginning_of_month
-    @selected_month_end = @selected_date.end_of_month
+    @selected_date = parse_month(params[:month])
+    today = Time.zone.today
 
-    month_scope = current_user.expenses
-                             .where(expense_date: @selected_month_start..@selected_month_end)
-                             .includes(:category)
-                             .order(expense_date: :desc, created_at: :desc)
+    month_range = @selected_date.beginning_of_month..
+                  @selected_date.end_of_month
 
-    # Paginate
-    @pagy, @expenses = pagy(month_scope, limit: 20)
+    scope = current_user.expenses
+                         .where(expense_date: month_range)
 
-    # Stats use full month scope
-    all_month_expenses = month_scope.to_a
+    @pagy, @expenses = pagy(
+      scope
+        .includes(:category)
+        .order(expense_date: :desc, created_at: :desc),
+      limit: 20
+    )
 
-    @total_income = all_month_expenses.select { |e| e.amount > 0 }.sum(&:amount)
-    @total_expenses = all_month_expenses.select { |e| e.amount < 0 }.sum { |e| -e.amount }
-    @net_total = @total_income - @total_expenses
-    @expense_count = all_month_expenses.count { |e| e.amount < 0 }
-    @avg_daily = @total_expenses > 0 ? (@total_expenses / [ Time.zone.today.day, 1 ].max).round(2) : 0
-    @avg_transaction = @expense_count > 0 ? (@total_expenses / @expense_count).round(2) : 0
+    build_month_stats(scope)
+    build_year_stats(today)
+    build_category_totals(scope)
 
-    # Year totals
-    year_expenses = current_user.expenses
-                                .where(expense_date: Time.zone.today.beginning_of_year..Time.zone.today.end_of_year)
-    @year_income = year_expenses.select { |e| e.amount > 0 }.sum(&:amount)
-    @year_expenses_total = year_expenses.select { |e| e.amount < 0 }.sum { |e| -e.amount }
-    @year_net_total = @year_income - @year_expenses_total
-    @year_transaction_count = year_expenses.count
-
-    # Category breakdown
-    @category_totals = {}
-    all_month_expenses.each do |expense|
-      next if expense.amount >= 0
-      next if expense.category.nil?
-
-      name = expense.category.name
-      @category_totals[name] ||= {
-        amount: 0,
-        icon: expense.category.icon || "📌",
-        color: expense.category.color || "#6c757d",
-      }
-      @category_totals[name][:amount] += expense.amount.abs
-    end
-    @category_totals = @category_totals.sort_by { |_, data| -data[:amount] }.to_h
-
-    # Month navigation
     @month_name = @selected_date.strftime("%B %Y")
     @prev_month = @selected_date.prev_month
     @next_month = @selected_date.next_month
-    @is_current_month = @selected_date.month == Time.zone.today.month && @selected_date.year == Time.zone.today.year
-    @can_go_next = @selected_date < Time.zone.today.beginning_of_month
+
+    @is_current_month =
+      @selected_date.month == today.month &&
+      @selected_date.year == today.year
+
+    @can_go_next = @selected_date < today.beginning_of_month
 
     respond_to do |format|
       format.html
@@ -324,5 +301,70 @@ class ExpensesController < ApplicationController
 
   def expense_params
     params.require(:expense).permit(:amount, :expense_date, :description, :category_id)
+  end
+
+  def expense_params
+    params.require(:expense).permit(:amount, :expense_date, :description, :category_id)
+  end
+
+  # ============ MONTH STATS ============
+  def build_month_stats(scope)
+    # All expenses stored as positive amounts (expense tracker)
+    @month_total = scope.sum("ABS(amount)")
+    @month_count = scope.count
+
+    # Days elapsed in selected month
+    days = if @selected_date.beginning_of_month == Time.zone.today.beginning_of_month
+             Time.zone.today.day
+    else
+             @selected_date.end_of_month.day
+    end
+
+    # Averages
+    @avg_daily = days.positive? ? (@month_total / days.to_f).round(2) : 0
+    @avg_transaction = @month_count.positive? ? (@month_total / @month_count.to_f).round(2) : 0
+  end
+
+  # ============ YEAR STATS ============
+  def build_year_stats(today)
+    year_scope = current_user.expenses.where(
+      expense_date: today.beginning_of_year..today.end_of_year
+    )
+
+    @year_total = year_scope.sum("ABS(amount)")
+    @year_count = year_scope.count
+    @year_month_count = year_scope.distinct.count("EXTRACT(MONTH FROM expense_date)")
+    @year_avg_monthly = @year_month_count.positive? ? (@year_total / @year_month_count).round(2) : 0
+  end
+
+  # ============ CATEGORY TOTALS ============
+  def build_category_totals(scope)
+    raw_totals = scope
+      .joins(:category)
+      .group(
+        "categories.id",
+        "categories.name",
+        "categories.icon",
+        "categories.color"
+      )
+      .sum("ABS(expenses.amount)")
+
+    @category_totals = raw_totals
+      .map do |(key, amount)|
+        _id, name, icon, color = key
+        [ name, { amount: amount.to_f, icon: icon, color: color } ]
+      end
+      .sort_by { |_, data| -data[:amount] }
+      .to_h
+
+    # Month total for percentage calculations (must match)
+    @month_total = @category_totals.values.sum { |d| d[:amount] }
+  end
+
+  def parse_month(value)
+    return Date.current if value.blank?
+    Date.parse(value.to_s)
+  rescue Date::Error, TypeError
+    Date.current
   end
 end

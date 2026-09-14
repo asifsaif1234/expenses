@@ -16,7 +16,7 @@
       <%= render "shared/flash_messages" %>
 
       <!-- Sign In Form -->
-      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5" }) do |f| %>
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5", data: { turbo: false } }) do |f| %>
         
         <!-- Email Field -->
         <div>

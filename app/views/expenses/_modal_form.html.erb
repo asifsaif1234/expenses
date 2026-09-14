@@ -1,16 +1,9 @@
-<!-- app/views/expenses/_modal_form.html.erb -->
-<%# This should render the form %>
 <div data-controller="expense-form" class="w-full">
   <%= form_with(model: expense, 
                 url: expenses_path,
                 data: { 
                   action: "turbo:submit-end->expense-form#handleSubmit"
                 }) do |f| %>
-    
-    <!-- Debug: Show if form is rendering -->
-    <!-- Form is rendering -->
-    
-    <!-- Error Messages -->
     <div class="mb-4">
       <% if expense.errors.any? %>
         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
@@ -26,7 +19,6 @@
       <% end %>
     </div>
 
-    <!-- Amount -->
     <div class="mb-4">
       <%= f.label :amount, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
         <span class="flex items-center gap-1">
@@ -51,7 +43,6 @@
       </div>
     </div>
 
-    <!-- Date -->
     <div class="mb-4">
       <%= f.label :expense_date, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
         <span class="flex items-center gap-1">
@@ -68,7 +59,6 @@
           data: { expense_form_target: "date" } %>
     </div>
 
-    <!-- Category -->
     <div class="mb-4">
       <%= f.label :category_id, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
         <span class="flex items-center gap-1">
@@ -88,7 +78,6 @@
             data: { expense_form_target: "category" } } %>
     </div>
 
-    <!-- Description -->
     <div class="mb-6">
       <%= f.label :description, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
         <span class="flex items-center gap-1">
@@ -105,7 +94,6 @@
           data: { expense_form_target: "description" } %>
     </div>
 
-    <!-- Form Actions -->
     <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
       <button type="button" 
               data-action="click->modal#close" 

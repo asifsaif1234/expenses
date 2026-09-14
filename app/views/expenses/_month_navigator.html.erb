@@ -1,0 +1,30 @@
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-3 flex items-center justify-between">
+  <%= link_to expenses_path(month: @prev_month.strftime("%Y-%m-%d")),
+      class: "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" do %>
+    <i class="fas fa-chevron-left"></i>
+    <span class="hidden sm:inline"><%= @prev_month.strftime("%b %Y") %></span>
+  <% end %>
+
+  <div class="flex items-center gap-3">
+    <i class="fas fa-calendar-alt text-indigo-600"></i>
+    <span class="text-base font-semibold text-gray-900"><%= @month_name %></span>
+    <% if @is_current_month %>
+      <span class="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+        Current
+      </span>
+    <% end %>
+  </div>
+
+  <% if @can_go_next %>
+    <%= link_to expenses_path(month: @next_month.strftime("%Y-%m-%d")),
+        class: "flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" do %>
+      <span class="hidden sm:inline"><%= @next_month.strftime("%b %Y") %></span>
+      <i class="fas fa-chevron-right"></i>
+    <% end %>
+  <% else %>
+    <span class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-300 cursor-not-allowed">
+      <span class="hidden sm:inline"><%= @next_month.strftime("%b %Y") %></span>
+      <i class="fas fa-chevron-right"></i>
+    </span>
+  <% end %>
+</div>

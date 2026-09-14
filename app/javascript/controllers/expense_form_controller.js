@@ -1,16 +1,11 @@
-// app/javascript/controllers/expense_form_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["amount", "date", "category", "description", "submit"]
   
-  connect() {
-    console.log("✅ Expense form controller connected")
-  }
-  
   handleSubmit(event) {
     if (event.detail.success) {
-      console.log("✅ Expense created successfully")
+      console.log("Expense created successfully")
       this.resetForm()
       this.closeModal()
     }
@@ -27,7 +22,6 @@ export default class extends Controller {
   }
   
   closeModal() {
-    // CHANGED: Use custom event instead of direct controller access
     document.dispatchEvent(new CustomEvent("modal:close"))
   }
 }

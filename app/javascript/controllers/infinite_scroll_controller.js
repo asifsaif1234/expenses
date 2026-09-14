@@ -1,4 +1,3 @@
-// app/javascript/controllers/infinite_scroll_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
@@ -8,7 +7,6 @@ export default class extends Controller {
   }
   
   connect() {
-    console.log("✅ Infinite scroll connected:", this.nextUrlValue)
     
     this.observer = new IntersectionObserver(
       this.handleIntersection.bind(this),
@@ -23,7 +21,7 @@ export default class extends Controller {
   }
   
   disconnect() {
-    console.log("❌ Infinite scroll disconnected")
+    console.log("Infinite scroll disconnected")
     this.observer?.disconnect()
   }
   
@@ -57,7 +55,7 @@ export default class extends Controller {
         Turbo.renderStreamMessage(html)
       }
     } catch (error) {
-      console.error("❌ Error loading more:", error)
+      console.error("Error loading more:", error)
     } finally {
       this.loadingValue = false
       this.hideLoader()

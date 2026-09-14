@@ -1,13 +1,8 @@
-// app/javascript/controllers/modal_trigger_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static values = { url: String }
-  
-  connect() {
-    console.log("✅ Modal trigger connected")
-  }
-  
+
   async open(event) {
     event.preventDefault()
     event.stopPropagation()
@@ -15,11 +10,8 @@ export default class extends Controller {
     const url = this.urlValue || event.currentTarget.dataset.modalTriggerUrl
     
     if (!url) {
-      console.error("❌ No URL provided for modal")
       return
     }
-    
-    console.log("📡 Loading modal content from:", url)
     
     try {
       // Fetch the content directly
@@ -35,31 +27,28 @@ export default class extends Controller {
       }
       
       const html = await response.text()
-      console.log("✅ Content loaded, length:", html.length)
       
-      // Insert the content into the modal
       const contentContainer = document.getElementById('modal_content')
       if (contentContainer) {
         contentContainer.innerHTML = html
-        console.log("✅ Content inserted into modal")
         
         // Check if form was loaded
         const form = contentContainer.querySelector('form')
         if (form) {
-          console.log("✅ Form found in loaded content")
+          console.log("Form found in loaded content")
         } else {
-          console.log("⚠️ No form found in loaded content")
+          console.log("No form found in loaded content")
           console.log("Content preview:", html.substring(0, 200))
         }
       } else {
-        console.error("❌ modal_content container not found")
+        console.error("modal_content container not found")
       }
       
       // Open the modal
       this.openModal()
       
     } catch (error) {
-      console.error("❌ Error loading modal content:", error)
+      console.error("Error loading modal content:", error)
       // Show error in modal
       const contentContainer = document.getElementById('modal_content')
       if (contentContainer) {
@@ -91,10 +80,10 @@ export default class extends Controller {
           modalController.open()
         }, 200)
       } else {
-        console.error("❌ Modal controller not found")
+        console.error("Modal controller not found")
       }
     } else {
-      console.error("❌ Modal element not found")
+      console.error("Modal element not found")
     }
   }
 }
