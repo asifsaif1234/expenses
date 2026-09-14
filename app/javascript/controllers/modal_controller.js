@@ -1,4 +1,3 @@
-// app/javascript/controllers/modal_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
@@ -6,10 +5,7 @@ export default class extends Controller {
   static values = { open: Boolean }
   
   connect() {
-    console.log("✅ Modal controller connected")
     document.addEventListener("keydown", this.handleEscape.bind(this))
-    
-    // NEW: Listen for custom modal:close events
     document.addEventListener("modal:close", this.handleCloseEvent.bind(this))
   }
   
@@ -19,7 +15,6 @@ export default class extends Controller {
   }
   
   open() {
-    console.log("🔄 Opening modal")
     this.modalTarget.classList.remove("hidden")
     document.body.style.overflow = "hidden"
     
@@ -31,7 +26,6 @@ export default class extends Controller {
   }
   
   close() {
-    console.log("🔄 Closing modal")
     this.containerTarget.setAttribute("data-show", "false")
     
     setTimeout(() => {
@@ -41,7 +35,6 @@ export default class extends Controller {
     }, 300)
   }
   
-  // NEW: Handle custom close event
   handleCloseEvent(event) {
     console.log("📩 Received modal:close event")
     this.close()

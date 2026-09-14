@@ -1,4 +1,3 @@
-<!-- app/views/expenses/_category_breakdown.html.erb -->
 <div class="lg:col-span-1">
   <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 sticky top-20">
     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -10,7 +9,7 @@
     <% if @category_totals.any? %>
       <div class="space-y-3">
         <% @category_totals.each do |name, data| %>
-          <% percentage = (@total_expenses > 0 ? (data[:amount] / @total_expenses * 100) : 0) %>
+          <% percentage = (@month_total > 0 ? (data[:amount] / @month_total * 100) : 0) %>
           <div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-700 flex items-center gap-1">
@@ -36,29 +35,19 @@
         <p>No expenses to categorize</p>
       </div>
     <% end %>
-    
-    <!-- Quick Stats -->
     <div class="mt-6 pt-6 border-t border-gray-100">
       <div class="grid grid-cols-2 gap-3">
         <!-- Average Daily -->
         <div class="text-center p-3 bg-gray-50 rounded-lg">
           <p class="text-xs text-gray-500">Avg Daily</p>
           <p class="text-lg font-bold text-gray-900 tabular-nums">
-            $<%= number_with_precision(
-              (@total_expenses > 0 ? @total_expenses / [Date.today.day, 1].max : 0).round(2), 
-              precision: 2
-            ) %>
+            $<%= number_with_precision(@avg_daily || 0, precision: 2) %>
           </p>
         </div>
-        
-        <!-- Average Transaction -->
         <div class="text-center p-3 bg-gray-50 rounded-lg">
-          <p class="text-xs text-gray-500">Avg Transaction</p>
+          <p class="text-xs text-gray-500">Month Total</p>
           <p class="text-lg font-bold text-gray-900 tabular-nums">
-            $<%= number_with_precision(
-              (@expense_count.to_i > 0 ? @total_expenses / @expense_count.to_i : 0).round(2),
-              precision: 2
-            ) %>
+            $<%= number_with_precision(@month_total || 0, precision: 2) %>
           </p>
         </div>
       </div>
