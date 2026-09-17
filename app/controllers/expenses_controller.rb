@@ -5,7 +5,7 @@ class ExpensesController < ApplicationController
   include Pagy::Method
 
   before_action :authenticate_user!
-  before_action :set_expense, only: [ :edit, :update, :destroy]
+  before_action :set_expense, only: [ :edit, :update, :destroy ]
   before_action :set_categories, only: [ :new, :create ]
 
   def index
@@ -267,8 +267,8 @@ class ExpensesController < ApplicationController
   # GET /expenses/:id/edit (modal)
   def edit
     @categories = current_user.available_categories
-    
-    render partial: "expenses/modal_form", 
+
+    render partial: "expenses/modal_form",
            locals: { expense: @expense, categories: @categories },
            layout: false
   end
@@ -277,7 +277,7 @@ class ExpensesController < ApplicationController
   def update
     if valid_category? && @expense.update(expense_params)
       flash.now[:notice] = "Expense updated successfully!"
-      
+
       respond_to do |format|
         format.html { redirect_to expenses_path }
         format.turbo_stream
@@ -288,9 +288,9 @@ class ExpensesController < ApplicationController
         format.html { render :edit, status: :unprocessable_entity }
         format.turbo_stream do
           render turbo_stream: [
-            turbo_stream.replace("modal_content", 
-                                 partial: "expenses/modal_form", 
-                                 locals: { expense: @expense, categories: @categories })
+            turbo_stream.replace("modal_content",
+                                 partial: "expenses/modal_form",
+                                 locals: { expense: @expense, categories: @categories }),
           ], status: :unprocessable_entity
         end
       end
@@ -299,15 +299,15 @@ class ExpensesController < ApplicationController
 
   # DELETE /expenses/:id
   def destroy
-    @expense.destroy
-    
+    @expense.destroy!
+
     respond_to do |format|
       format.html { redirect_to expenses_path, notice: "Expense deleted." }
       format.turbo_stream do
         flash.now[:notice] = "Expense deleted successfully!"
         render turbo_stream: [
           turbo_stream.remove(@expense),
-          turbo_stream.replace("flash_messages", partial: "shared/flash")
+          turbo_stream.replace("flash_messages", partial: "shared/flash"),
         ]
       end
     end
