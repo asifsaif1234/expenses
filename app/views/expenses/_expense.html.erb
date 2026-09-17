@@ -1,12 +1,17 @@
+<!-- app/views/expenses/_expense.html.erb -->
 <div id="<%= dom_id(expense) %>" 
-     class="expense-item px-6 py-4 hover:bg-gray-50 transition-colors">
-  <div class="flex items-center justify-between gap-2">
+     class="expense-item group px-6 py-4 hover:bg-gray-50 transition-colors">
+  <div class="flex items-center justify-between gap-3">
+    
+    <!-- Left: Icon + Description + Meta -->
     <div class="flex items-center gap-3 min-w-0 flex-1">
+      <!-- Category Icon -->
       <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
                   <%= expense.amount > 0 ? 'bg-green-50' : 'bg-red-50' %>">
         <span class="text-lg leading-none"><%= expense.category&.icon || "📌" %></span>
       </div>
       
+      <!-- Description + Meta -->
       <div class="min-w-0 flex-1">
         <p class="text-sm font-medium text-gray-900 truncate">
           <%= expense.description.presence || "Untitled Expense" %>
@@ -25,10 +30,40 @@
       </div>
     </div>
     
-    <div class="flex-shrink-0 ml-3">
+    <!-- Right: Amount + Actions -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      <!-- Amount -->
       <span class="text-base font-semibold <%= expense.amount > 0 ? 'text-green-600' : 'text-red-600' %> tabular-nums">
         <%= expense.amount > 0 ? '+' : '−' %>$<%= number_with_precision(expense.amount.abs, precision: 2) %>
       </span>
+
+      <!-- Edit / Delete Actions - ALWAYS VISIBLE -->
+      <div class="flex items-center gap-1">
+        <!-- Edit Button -->
+        <button type="button"
+                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                title="Edit expense"
+                data-controller="modal-trigger"
+                data-action="click->modal-trigger#open"
+                data-modal-trigger-url="<%= edit_expense_path(expense) %>">
+          <i class="fas fa-pen text-xs"></i>
+        </button>
+
+        <!-- Delete Button -->
+        <%= button_to expense_path(expense),
+            method: :delete,
+            form: { 
+              data: { 
+                turbo_confirm: "Delete this expense? This action cannot be undone.",
+                turbo: true
+              },
+              class: "inline"
+            },
+            class: "w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer",
+            title: "Delete expense" do %>
+          <i class="fas fa-trash text-xs"></i>
+        <% end %>
+      </div>
     </div>
     
   </div>

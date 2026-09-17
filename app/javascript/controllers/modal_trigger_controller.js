@@ -1,64 +1,59 @@
+// app/javascript/controllers/modal_trigger_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { url: String }
-
+  static values = { url: String, title: String }
+  
+  connect() {
+    console.log("✅ Modal trigger connected")
+  }
+  
   async open(event) {
     event.preventDefault()
     event.stopPropagation()
     
     const url = this.urlValue || event.currentTarget.dataset.modalTriggerUrl
+    const title = event.currentTarget.dataset.modalTriggerTitle || "Add Expense"
     
     if (!url) {
+      console.error("❌ No URL provided for modal")
       return
     }
     
+    console.log("📡 Loading modal content from:", url)
+    
     try {
-      // Fetch the content directly
       const response = await fetch(url, {
         headers: {
-          'Accept': 'text/html',
-          'X-Requested-With': 'XMLHttpRequest'
+          "Accept": "text/html",
+          "X-Requested-With": "XMLHttpRequest"
         }
       })
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       
       const html = await response.text()
       
-      const contentContainer = document.getElementById('modal_content')
+      // Update modal title
+      const titleEl = document.querySelector('[data-modal-target="titleText"]')
+      if (titleEl) titleEl.textContent = title
+      
+      // Insert content
+      const contentContainer = document.getElementById("modal_content")
       if (contentContainer) {
         contentContainer.innerHTML = html
-        
-        // Check if form was loaded
-        const form = contentContainer.querySelector('form')
-        if (form) {
-          console.log("Form found in loaded content")
-        } else {
-          console.log("No form found in loaded content")
-          console.log("Content preview:", html.substring(0, 200))
-        }
-      } else {
-        console.error("modal_content container not found")
       }
       
-      // Open the modal
       this.openModal()
       
     } catch (error) {
-      console.error("Error loading modal content:", error)
-      // Show error in modal
-      const contentContainer = document.getElementById('modal_content')
+      console.error("❌ Error:", error)
+      const contentContainer = document.getElementById("modal_content")
       if (contentContainer) {
         contentContainer.innerHTML = `
           <div class="text-center py-8 text-red-600">
-            <svg class="w-12 h-12 mx-auto mb-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
+            <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
             <p>Failed to load form. Please try again.</p>
-            <p class="text-sm text-gray-500 mt-2">${error.message}</p>
           </div>
         `
         this.openModal()
@@ -71,19 +66,11 @@ export default class extends Controller {
     if (modalElement) {
       const modalController = this.application.getControllerForElementAndIdentifier(
         modalElement, 
-        'modal'
+        "modal"
       )
-      
       if (modalController) {
-        setTimeout(() => {
-          console.log("🚀 Opening modal")
-          modalController.open()
-        }, 200)
-      } else {
-        console.error("Modal controller not found")
+        setTimeout(() => modalController.open(), 200)
       }
-    } else {
-      console.error("Modal element not found")
     }
   }
 }

@@ -12,7 +12,7 @@
         </p>
       </div>
       <button type="button"
-              class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+              class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium cursor-pointer rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
               data-controller="modal-trigger"
               data-action="click->modal-trigger#open"
               data-modal-trigger-url="<%= new_expense_path %>">
@@ -118,7 +118,7 @@
                 <p class="text-lg font-medium text-gray-500">No expenses in <%= @month_name %></p>
                 <p class="text-sm">Start tracking your expenses by adding one!</p>
                 <button type="button"
-                        class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                        class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium cursor-pointer rounded-lg hover:bg-indigo-700 transition-colors"
                         data-controller="modal-trigger"
                         data-action="click->modal-trigger#open"
                         data-modal-trigger-url="<%= new_expense_path %>">
