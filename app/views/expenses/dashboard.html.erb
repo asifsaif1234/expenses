@@ -14,7 +14,7 @@
         <%= @current_month %>
       </span>
       <button type="button"
-              class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+              class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform cursor-pointer hover:scale-105 transition-all duration-200"
               data-controller="modal-trigger"
               data-action="click->modal-trigger#open"
               data-modal-trigger-url="<%= new_expense_path %>">

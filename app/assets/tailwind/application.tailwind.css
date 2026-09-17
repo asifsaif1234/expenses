@@ -3,7 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer components {
   .modal-backdrop {
     background: rgba(0, 0, 0, 0.5);
@@ -14,6 +13,10 @@
 @layer utilities {
   .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
+  }
+
+  .expense-item {
+    animation: slideIn 0.3s ease-out;
   }
   
   .animate-spin {
@@ -41,6 +44,24 @@
   }
 }
 
+@keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Hand cursor for buttons */
+  button:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
 /* Modal animation */
 [data-controller="modal"] [data-modal-target="container"] {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

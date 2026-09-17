@@ -1,30 +1,29 @@
-<div data-controller="expense-form" class="w-full">
+<!-- app/views/expenses/_modal_form.html.erb -->
+<div data-controller="expense-form">
   <%= form_with(model: expense, 
-                url: expenses_path,
+                url: expense.persisted? ? expense_path(expense) : expenses_path,
+                method: expense.persisted? ? :patch : :post,
                 data: { 
                   action: "turbo:submit-end->expense-form#handleSubmit"
                 }) do |f| %>
-    <div class="mb-4">
-      <% if expense.errors.any? %>
-        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          <% expense.errors.full_messages.each do |msg| %>
-            <p class="flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <%= msg %>
-            </p>
-          <% end %>
-        </div>
-      <% end %>
-    </div>
+    
+    <!-- Error Messages -->
+    <% if expense.errors.any? %>
+      <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+        <% expense.errors.full_messages.each do |msg| %>
+          <p class="flex items-center gap-2">
+            <i class="fas fa-exclamation-circle"></i>
+            <%= msg %>
+          </p>
+        <% end %>
+      </div>
+    <% end %>
 
+    <!-- Amount -->
     <div class="mb-4">
       <%= f.label :amount, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
-        <span class="flex items-center gap-1">
-          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
+        <span class="flex items-center gap-1.5">
+          <i class="fas fa-dollar-sign text-indigo-500 text-xs"></i>
           Amount
         </span>
       <% end %>
@@ -35,36 +34,35 @@
         <%= f.number_field :amount, 
             step: 0.01,
             min: 0,
-            class: "w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200",
+            class: "w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all duration-200 text-lg font-semibold",
             placeholder: "0.00",
             required: true,
             autofocus: true,
+            inputmode: "decimal",
             data: { expense_form_target: "amount" } %>
       </div>
     </div>
 
+    <!-- Date -->
     <div class="mb-4">
       <%= f.label :expense_date, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
-        <span class="flex items-center gap-1">
-          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-          </svg>
+        <span class="flex items-center gap-1.5">
+          <i class="fas fa-calendar-alt text-indigo-500 text-xs"></i>
           Date
         </span>
       <% end %>
       <%= f.date_field :expense_date, 
-          value: Date.today.strftime("%Y-%m-%d"),
-          class: "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200",
+          value: expense.expense_date&.strftime("%Y-%m-%d") || Date.today.strftime("%Y-%m-%d"),
+          class: "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all duration-200",
           required: true,
           data: { expense_form_target: "date" } %>
     </div>
 
+    <!-- Category -->
     <div class="mb-4">
       <%= f.label :category_id, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
-        <span class="flex items-center gap-1">
-          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-          </svg>
+        <span class="flex items-center gap-1.5">
+          <i class="fas fa-tag text-indigo-500 text-xs"></i>
           Category
         </span>
       <% end %>
@@ -73,35 +71,35 @@
           :id, 
           :full_name, 
           { include_blank: "Select a category" }, 
-          { class: "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200",
+          { class: "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all duration-200",
             required: true,
             data: { expense_form_target: "category" } } %>
     </div>
 
+    <!-- Description -->
     <div class="mb-6">
       <%= f.label :description, class: "block text-sm font-medium text-gray-700 mb-1.5" do %>
-        <span class="flex items-center gap-1">
-          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
+        <span class="flex items-center gap-1.5">
+          <i class="fas fa-align-left text-indigo-500 text-xs"></i>
           Description
         </span>
       <% end %>
       <%= f.text_area :description, 
           rows: 3,
-          class: "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200",
+          class: "w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 focus:bg-white transition-all duration-200",
           placeholder: "Add a description (optional)",
           data: { expense_form_target: "description" } %>
     </div>
 
+    <!-- Form Actions -->
     <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
       <button type="button" 
               data-action="click->modal#close" 
-              class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+              class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
         Cancel
       </button>
-      <%= f.submit "Add Expense", 
-          class: "px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200",
+      <%= f.submit expense.persisted? ? "Update Expense" : "Add Expense", 
+          class: "px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200 cursor-pointer",
           data: { expense_form_target: "submit" } %>
     </div>
   <% end %>

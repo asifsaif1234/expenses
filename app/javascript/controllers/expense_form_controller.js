@@ -1,11 +1,16 @@
+// app/javascript/controllers/expense_form_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["amount", "date", "category", "description", "submit"]
   
+  connect() {
+    console.log("✅ Expense form connected")
+  }
+  
   handleSubmit(event) {
     if (event.detail.success) {
-      console.log("Expense created successfully")
+      console.log("✅ Form submitted successfully")
       this.resetForm()
       this.closeModal()
     }
@@ -16,9 +21,6 @@ export default class extends Controller {
     if (this.hasDateTarget) this.dateTarget.value = ""
     if (this.hasCategoryTarget) this.categoryTarget.value = ""
     if (this.hasDescriptionTarget) this.descriptionTarget.value = ""
-    if (this.hasSubmitTarget) {
-      this.submitTarget.disabled = false
-    }
   }
   
   closeModal() {

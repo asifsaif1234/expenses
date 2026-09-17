@@ -1,0 +1,4 @@
+<!-- app/views/expenses/destroy.turbo_stream.erb -->
+<%= turbo_stream.remove @expense %>
+
+<%= turbo_stream.replace "flash_messages", partial: "shared/flash" %>

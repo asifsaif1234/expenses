@@ -2,10 +2,10 @@
 
 # app/controllers/expenses_controller.rb
 class ExpensesController < ApplicationController
-  include Pagy::Backend
+  include Pagy::Method
 
   before_action :authenticate_user!
-  # before_action :set_expense, only: [ :edit, :update, :destroy]
+  before_action :set_expense, only: [ :edit, :update, :destroy]
   before_action :set_categories, only: [ :new, :create ]
 
   def index
@@ -19,10 +19,9 @@ class ExpensesController < ApplicationController
                          .where(expense_date: month_range)
 
     @pagy, @expenses = pagy(
-      scope
-        .includes(:category)
-        .order(expense_date: :desc, created_at: :desc),
-      limit: 20
+      :offset,
+      scope.includes(:category).order(expense_date: :desc, created_at: :desc),
+      items: 20
     )
 
     build_month_stats(scope)
@@ -265,13 +264,61 @@ class ExpensesController < ApplicationController
     }
   end
 
+  # GET /expenses/:id/edit (modal)
+  def edit
+    @categories = current_user.available_categories
+    
+    render partial: "expenses/modal_form", 
+           locals: { expense: @expense, categories: @categories },
+           layout: false
+  end
+
+  # PATCH/PUT /expenses/:id
+  def update
+    if valid_category? && @expense.update(expense_params)
+      flash.now[:notice] = "Expense updated successfully!"
+      
+      respond_to do |format|
+        format.html { redirect_to expenses_path }
+        format.turbo_stream
+      end
+    else
+      @categories = current_user.available_categories
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.turbo_stream do
+          render turbo_stream: [
+            turbo_stream.replace("modal_content", 
+                                 partial: "expenses/modal_form", 
+                                 locals: { expense: @expense, categories: @categories })
+          ], status: :unprocessable_entity
+        end
+      end
+    end
+  end
+
+  # DELETE /expenses/:id
+  def destroy
+    @expense.destroy
+    
+    respond_to do |format|
+      format.html { redirect_to expenses_path, notice: "Expense deleted." }
+      format.turbo_stream do
+        flash.now[:notice] = "Expense deleted successfully!"
+        render turbo_stream: [
+          turbo_stream.remove(@expense),
+          turbo_stream.replace("flash_messages", partial: "shared/flash")
+        ]
+      end
+    end
+  end
   private
 
-  # def set_expense
-  #   @expense = current_user.expenses.find(params[:id])
-  # rescue ActiveRecord::RecordNotFound
-  #   redirect_to expenses_path, alert: "Expense not found."
-  # end
+  def set_expense
+    @expense = current_user.expenses.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    redirect_to expenses_path, alert: "Expense not found."
+  end
 
   def set_categories
     @categories = current_user.available_categories

@@ -36,7 +36,7 @@
 
          <!-- Add Expense Button - FIXED for modal -->
         <button type="button"
-                class="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                class="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium rounded-lg cursor-pointer hover:shadow-lg transform hover:scale-105 transition-all duration-200"
                 data-controller="modal-trigger"
                 data-action="click->modal-trigger#open"
                 data-modal-trigger-url="<%= new_expense_path %>">
@@ -46,7 +46,7 @@
 
         <!-- User Menu Dropdown -->
         <div class="relative" data-navigation-target="userMenuContainer">
-          <button class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors" data-action="click->navigation#toggleUserMenu">
+          <button class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors" data-action="click->navigation#toggleUserMenu">
             <div class="w-8 h-8 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
               <%= current_user&.full_name&.first&.upcase || current_user&.email&.first&.upcase || "U" %>
             </div>
@@ -101,7 +101,7 @@
 
             <!-- Sign Out Button -->
             <div class="border-t border-gray-100 py-1">
-              <%= button_to destroy_user_session_path, method: :delete, class: "flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" do %>
+              <%= button_to destroy_user_session_path, method: :delete, class: "flex items-center gap-3 w-full text-left px-4 py-2 text-sm text-red-600 cursor-pointer hover:bg-red-50 transition-colors" do %>
                 <i class="fas fa-sign-out-alt text-red-400 w-4"></i>
                 Sign Out
               <% end %>
@@ -110,7 +110,7 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <button class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors" data-action="click->navigation#toggleMobileMenu">
+        <button class="md:hidden p-2 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors" data-action="click->navigation#toggleMobileMenu">
           <i class="fas fa-bars text-gray-600 text-xl"></i>
         </button>
       </div>
@@ -144,7 +144,7 @@
         
         <!-- Mobile Add Expense -->
         <button type="button"
-                class="flex items-center gap-3 py-2 px-3 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors w-full text-left"
+                class="flex items-center gap-3 py-2 px-3 bg-indigo-50 text-indigo-700 cursor-pointer hover:bg-indigo-100 rounded-lg transition-colors w-full text-left"
                 data-controller="modal-trigger"
                 data-action="click->modal-trigger#open"
                 data-modal-trigger-url="<%= new_expense_path %>">
@@ -165,7 +165,7 @@
         <% end %>
         
         <!-- Mobile Sign Out -->
-        <%= button_to destroy_user_session_path, method: :delete, class: "flex items-center gap-3 w-full text-left py-2 px-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors" do %>
+        <%= button_to destroy_user_session_path, method: :delete, class: "flex items-center gap-3 w-full text-left py-2 px-3 text-red-600 cursor-pointer hover:bg-red-50 rounded-lg transition-colors" do %>
           <i class="fas fa-sign-out-alt w-4"></i>
           Sign Out
         <% end %>

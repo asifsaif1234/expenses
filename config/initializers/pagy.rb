@@ -1,5 +1,5 @@
 # config/initializers/pagy.rb
-require "pagy/extras/overflow"
+require "pagy"
 
-Pagy::DEFAULT[:limit] = 20
-Pagy::DEFAULT[:overflow] = :last_page
+Pagy.options[:items] = 20
+Pagy.options[:overflow] = :last_page
