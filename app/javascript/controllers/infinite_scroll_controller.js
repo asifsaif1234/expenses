@@ -1,78 +1,93 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { 
-    nextUrl: String,
-    loading: { type: Boolean, default: false }
+  static values = {
+    nextUrl: String
   }
-  
+
   connect() {
-    
+    this.loading = false
+
     this.observer = new IntersectionObserver(
-      this.handleIntersection.bind(this),
-      { 
-        root: null, 
-        rootMargin: "300px", 
-        threshold: 0 
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          this.loadNextPage()
+        }
+      },
+      {
+        rootMargin: "300px"
       }
     )
-    
+
     this.observer.observe(this.element)
   }
-  
+
   disconnect() {
-    console.log("Infinite scroll disconnected")
-    this.observer?.disconnect()
+    if (this.observer) {
+      this.observer.disconnect()
+      this.observer = null
+    }
   }
-  
-  handleIntersection(entries) {
-    entries.forEach(entry => {
-      if (entry.isIntersecting && this.hasNextUrlValue() && !this.loadingValue) {
-        this.loadMore()
-      }
-    })
-  }
-  
-  async loadMore() {
-    if (!this.hasNextUrlValue() || this.loadingValue) return
-    
-    this.loadingValue = true
-    this.showLoader()
-    
+
+  async loadNextPage() {
+    if (this.loading) return
+
+    if (!this.hasNextUrlValue || !this.nextUrlValue) {
+      return
+    }
+
+    this.loading = true
+
+    this.showLoading()
+
     try {
       const response = await fetch(this.nextUrlValue, {
         headers: {
-          "Accept": "text/vnd.turbo-stream.html",
-          "X-Requested-With": "XMLHttpRequest"
-        }
+          Accept: "text/vnd.turbo-stream.html"
+        },
+        credentials: "same-origin"
       })
-      
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      
-      const html = await response.text()
-      
-      if (typeof Turbo !== "undefined" && Turbo.renderStreamMessage) {
-        Turbo.renderStreamMessage(html)
+
+      if (!response.ok) {
+        throw new Error(
+          `Infinite scroll request failed: ${response.status}`
+        )
       }
+
+      const html = await response.text()
+
+      Turbo.renderStreamMessage(html)
+
     } catch (error) {
-      console.error("Error loading more:", error)
+      console.error(
+        "Infinite scroll error:",
+        error
+      )
     } finally {
-      this.loadingValue = false
-      this.hideLoader()
+      this.loading = false
+      this.hideLoading()
     }
   }
-  
-  showLoader() {
-    const loader = document.getElementById("infinite_scroll_loading")
-    if (loader) loader.style.display = "block"
+
+  showLoading() {
+    const loadingElement =
+      document.getElementById(
+        "infinite_scroll_loading"
+      )
+
+    if (loadingElement) {
+      loadingElement.style.display = "block"
+    }
   }
-  
-  hideLoader() {
-    const loader = document.getElementById("infinite_scroll_loading")
-    if (loader) loader.style.display = "none"
-  }
-  
-  hasNextUrlValue() {
-    return this.nextUrlValue && this.nextUrlValue.length > 0
+
+  hideLoading() {
+    const loadingElement =
+      document.getElementById(
+        "infinite_scroll_loading"
+      )
+
+    if (loadingElement) {
+      loadingElement.style.display = "none"
+    }
   }
 }

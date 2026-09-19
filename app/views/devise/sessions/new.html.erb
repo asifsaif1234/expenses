@@ -13,7 +13,7 @@
     <!-- Card -->
     <div class="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
       <!-- Flash Messages -->
-      <%= render "shared/flash_messages" %>
+      <%#= render "shared/flash" %>
 
       <!-- Sign In Form -->
       <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-5", data: { turbo: false } }) do |f| %>
