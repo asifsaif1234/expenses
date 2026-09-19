@@ -1,0 +1,131 @@
+<!-- app/views/expenses/_month_stats.html.erb -->
+
+<div
+  id="expense_stats"
+  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+>
+
+  <!-- Year Total -->
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <div class="flex items-center justify-between">
+
+      <div>
+        <p class="text-sm text-gray-500 font-medium">
+          <%= @selected_year %> Total
+        </p>
+
+        <p class="text-2xl font-bold text-gray-900 mt-1 tabular-nums">
+          $<%= number_with_precision(
+            @year_total,
+            precision: 2,
+            delimiter: ","
+          ) %>
+        </p>
+
+        <p class="text-xs text-gray-400">
+          <%= pluralize(@year_count, "transaction") %> this year
+        </p>
+      </div>
+
+      <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center">
+        <i class="fas fa-chart-line text-indigo-600 text-xl"></i>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Average Monthly -->
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <div class="flex items-center justify-between">
+
+      <div>
+        <p class="text-sm text-gray-500 font-medium">
+          Avg Monthly
+        </p>
+
+        <p class="text-2xl font-bold text-purple-600 mt-1 tabular-nums">
+          $<%= number_with_precision(
+            @year_avg_monthly,
+            precision: 2,
+            delimiter: ","
+          ) %>
+        </p>
+
+        <p class="text-xs text-gray-400">
+          <%= @year_month_count %> months tracked
+        </p>
+      </div>
+
+      <div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+        <i class="fas fa-calendar-week text-purple-600 text-xl"></i>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Month Total -->
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <div class="flex items-center justify-between">
+
+      <div>
+        <p class="text-sm text-gray-500 font-medium">
+          <%= @month_name %> Total
+        </p>
+
+        <p class="text-2xl font-bold text-red-600 mt-1 tabular-nums">
+          $<%= number_with_precision(
+            @month_total,
+            precision: 2,
+            delimiter: ","
+          ) %>
+        </p>
+
+        <p class="text-xs text-gray-400">
+          <%= pluralize(@month_count, "transaction") %>
+        </p>
+      </div>
+
+      <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+        <i class="fas fa-calendar-alt text-red-600 text-xl"></i>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Average Daily -->
+  <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
+    <div class="flex items-center justify-between">
+
+      <div>
+        <p class="text-sm text-gray-500 font-medium">
+          Avg Daily
+        </p>
+
+        <p class="text-2xl font-bold text-green-600 mt-1 tabular-nums">
+          $<%= number_with_precision(
+            @avg_daily,
+            precision: 2,
+            delimiter: ","
+          ) %>
+        </p>
+
+        <p class="text-xs text-gray-400">
+          Avg trans:
+          $<%= number_with_precision(
+            @avg_transaction,
+            precision: 2
+          ) %>
+        </p>
+      </div>
+
+      <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+        <i class="fas fa-coins text-green-600 text-xl"></i>
+      </div>
+
+    </div>
+  </div>
+
+</div>
