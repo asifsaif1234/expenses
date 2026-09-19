@@ -5,38 +5,13 @@ class ExpensesController < ApplicationController
   include Pagy::Method
 
   before_action :authenticate_user!
-  before_action :set_expense, only: [ :edit, :update, :destroy ]
-  before_action :set_categories, only: [ :new, :create ]
+  before_action :set_expense, only: %i[edit update destroy]
+  before_action :set_categories, only: %i[new create edit update]
+
+  ITEMS_PER_PAGE = 20
 
   def index
-    @selected_date = parse_month(params[:month])
-    today = Time.zone.today
-
-    month_range = @selected_date.beginning_of_month..
-                  @selected_date.end_of_month
-
-    scope = current_user.expenses
-                         .where(expense_date: month_range)
-
-    @pagy, @expenses = pagy(
-      :offset,
-      scope.includes(:category).order(expense_date: :desc, created_at: :desc),
-      items: 20
-    )
-
-    build_month_stats(scope)
-    build_year_stats(today)
-    build_category_totals(scope)
-
-    @month_name = @selected_date.strftime("%B %Y")
-    @prev_month = @selected_date.prev_month
-    @next_month = @selected_date.next_month
-
-    @is_current_month =
-      @selected_date.month == today.month &&
-      @selected_date.year == today.year
-
-    @can_go_next = @selected_date < today.beginning_of_month
+    prepare_index_data
 
     respond_to do |format|
       format.html
@@ -44,46 +19,68 @@ class ExpensesController < ApplicationController
     end
   end
 
-  # GET /expenses/new (for modal)
   def new
     @expense = Expense.new(expense_date: Time.zone.today)
-    @categories = current_user.available_categories
 
-    # Rails 8: Use render with layout: false
     render partial: "expenses/modal_form",
-           locals: { expense: @expense, categories: @categories },
+           locals: {
+             expense: @expense,
+             categories: @categories,
+           },
            layout: false
   end
 
   def create
     @expense = current_user.expenses.new(expense_params)
-    @categories = current_user.available_categories
 
     if valid_category? && @expense.save
-      flash[:notice] = "Expense added successfully!"
-
-      respond_to do |format|
-        format.html { redirect_to expenses_path }
-        format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.prepend("expenses_list",
-                                 partial: "expense",
-                                 locals: { expense: @expense }),
-            turbo_stream.replace("flash_messages",
-                                 partial: "shared/flash"),
-          ]
-        end
-      end
+      handle_successful_create
     else
-      respond_to do |format|
-        format.html { render :new, status: :unprocessable_entity }
-        format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.replace("modal_content",
-                                 partial: "expenses/modal_form",
-                                 locals: { expense: @expense, categories: @categories }),
-          ], status: :unprocessable_entity
-        end
+      handle_failed_mutation
+    end
+  end
+
+  def edit
+    render partial: "expenses/modal_form",
+           locals: {
+             expense: @expense,
+             categories: @categories,
+           },
+           layout: false
+  end
+
+  def update
+    if valid_category? && @expense.update(expense_params)
+      handle_successful_update
+    else
+      handle_failed_mutation
+    end
+  end
+
+  def destroy
+    @expense.destroy!
+
+    respond_to do |format|
+      format.html do
+        redirect_to expenses_path(month: selected_month_param),
+                    notice: "Expense deleted successfully."
+      end
+
+      format.turbo_stream do
+        prepare_index_data
+
+        flash.now[:notice] = "Expense deleted successfully."
+
+        render turbo_stream: [
+          turbo_stream.replace(
+            "expenses_dashboard",
+            partial: "expenses/dashboard"
+          ),
+          turbo_stream.replace(
+            "flash_messages",
+            partial: "shared/flash"
+          ),
+        ]
       end
     end
   end
@@ -264,154 +261,281 @@ class ExpensesController < ApplicationController
     }
   end
 
-  # GET /expenses/:id/edit (modal)
-  def edit
-    @categories = current_user.available_categories
+  private
 
-    render partial: "expenses/modal_form",
-           locals: { expense: @expense, categories: @categories },
-           layout: false
+  # INDEX
+  def prepare_index_data
+    @selected_date = parse_month(params[:month])
+
+    today = Time.zone.today
+
+    @month_range =
+      @selected_date.beginning_of_month..@selected_date.end_of_month
+
+    @expenses_scope = current_user.expenses
+                                  .where(expense_date: @month_range)
+
+    @pagy, @expenses = pagy(
+      :offset,
+      @expenses_scope
+        .includes(:category)
+        .order(expense_date: :desc, created_at: :desc, id: :desc),
+      items: ITEMS_PER_PAGE
+    )
+
+    build_month_stats(@expenses_scope)
+    build_year_stats
+    build_category_totals(@expenses_scope)
+
+    @month_name = @selected_date.strftime("%B %Y")
+    @prev_month = @selected_date.prev_month
+    @next_month = @selected_date.next_month
+
+    @is_current_month =
+      @selected_date.year == today.year &&
+      @selected_date.month == today.month
+
+    @can_go_next = @selected_date < today.beginning_of_month
+
+    @selected_month_param = @selected_date.strftime("%Y-%m")
   end
 
-  # PATCH/PUT /expenses/:id
-  def update
-    if valid_category? && @expense.update(expense_params)
-      flash.now[:notice] = "Expense updated successfully!"
-
-      respond_to do |format|
-        format.html { redirect_to expenses_path }
-        format.turbo_stream
-      end
-    else
-      @categories = current_user.available_categories
-      respond_to do |format|
-        format.html { render :edit, status: :unprocessable_entity }
-        format.turbo_stream do
-          render turbo_stream: [
-            turbo_stream.replace("modal_content",
-                                 partial: "expenses/modal_form",
-                                 locals: { expense: @expense, categories: @categories }),
-          ], status: :unprocessable_entity
-        end
-      end
-    end
-  end
-
-  # DELETE /expenses/:id
-  def destroy
-    @expense.destroy!
+  # CREATE
+  def handle_successful_create
+    flash[:notice] = "Expense added successfully."
 
     respond_to do |format|
-      format.html { redirect_to expenses_path, notice: "Expense deleted." }
+      format.html do
+        redirect_to expenses_path(
+          month: @expense.expense_date.strftime("%Y-%m")
+        )
+      end
+
       format.turbo_stream do
-        flash.now[:notice] = "Expense deleted successfully!"
+        # Navigate the dashboard to the month where the new
+        # expense actually belongs.
+        @selected_date = @expense.expense_date.to_date
+
+        prepare_index_data
+
         render turbo_stream: [
-          turbo_stream.remove(@expense),
-          turbo_stream.replace("flash_messages", partial: "shared/flash"),
+          turbo_stream.replace(
+            "expenses_dashboard",
+            partial: "expenses/dashboard"
+          ),
+          turbo_stream.replace(
+            "flash_messages",
+            partial: "shared/flash"
+          ),
+          turbo_stream.update(
+            "expense_modal",
+            ""
+          ),
         ]
       end
     end
   end
-  private
+
+  # UPDATE
+  def handle_successful_update
+    flash[:notice] = "Expense updated successfully."
+
+    respond_to do |format|
+      format.html do
+        redirect_to expenses_path(
+          month: @expense.expense_date.strftime("%Y-%m")
+        )
+      end
+
+      format.turbo_stream do
+        prepare_index_data
+
+        render turbo_stream: [
+          turbo_stream.replace(
+            "expenses_dashboard",
+            partial: "expenses/dashboard"
+          ),
+          turbo_stream.replace(
+            "flash_messages",
+            partial: "shared/flash"
+          ),
+          turbo_stream.update(
+            "expense_modal",
+            ""
+          ),
+        ]
+      end
+    end
+  end
+
+  # FAILED CREATE / UPDATE
+  def handle_failed_mutation
+    respond_to do |format|
+      format.html do
+        render(
+          action_name == "create" ? :new : :edit,
+          status: :unprocessable_entity
+        )
+      end
+
+      format.turbo_stream do
+        render turbo_stream: [
+          turbo_stream.replace(
+            "modal_content",
+            partial: "expenses/modal_form",
+            locals: {
+              expense: @expense,
+              categories: @categories,
+            }
+          ),
+        ], status: :unprocessable_entity
+      end
+    end
+  end
+
+  # MONTH STATISTICS
+
+  def build_month_stats(scope)
+    @month_total = scope.sum(:amount).to_f
+    @month_count = scope.count
+
+    today = Time.zone.today
+
+    days =
+      if @selected_date.year == today.year &&
+         @selected_date.month == today.month
+        today.day
+      else
+        @selected_date.end_of_month.day
+      end
+
+    @avg_daily =
+      if days.positive?
+        (@month_total / days).round(2)
+      else
+        0
+      end
+
+    @avg_transaction =
+      if @month_count.positive?
+        (@month_total / @month_count).round(2)
+      else
+        0
+      end
+  end
+
+  # YEAR STATISTICS
+
+  def build_year_stats
+    year_range =
+      @selected_date.beginning_of_year..@selected_date.end_of_year
+
+    year_scope =
+      current_user.expenses.where(expense_date: year_range)
+
+    @year_total = year_scope.sum(:amount).to_f
+    @year_count = year_scope.count
+
+    @year_month_count =
+      year_scope
+        .where.not(expense_date: nil)
+        .distinct
+        .count(
+          Arel.sql(
+            "EXTRACT(MONTH FROM expense_date)"
+          )
+        )
+
+    @year_avg_monthly =
+      if @year_month_count.positive?
+        (@year_total / @year_month_count).round(2)
+      else
+        0
+      end
+
+    @selected_year = @selected_date.year
+  end
+
+  # CATEGORY TOTALS
+  def build_category_totals(scope)
+    @category_totals =
+      scope
+        .joins(:category)
+        .group(
+          "categories.id",
+          "categories.name",
+          "categories.icon",
+          "categories.color"
+        )
+        .sum(:amount)
+        .map do |(id, name, icon, color), amount|
+          [
+            name,
+            {
+              id: id,
+              amount: amount.to_f,
+              icon: icon,
+              color: color,
+            },
+          ]
+        end
+        .sort_by { |_name, data| -data[:amount] }
+        .to_h
+  end
+
+  def valid_category?
+    category_id = expense_params[:category_id]
+
+    return true if category_id.blank?
+
+    category =
+      current_user
+        .available_categories
+        .find_by(id: category_id)
+
+    return true if category.present?
+
+    @expense.errors.add(
+      :category_id,
+      "is not valid"
+    )
+
+    false
+  end
 
   def set_expense
-    @expense = current_user.expenses.find(params[:id])
+    @expense =
+      current_user.expenses.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    redirect_to expenses_path, alert: "Expense not found."
+    redirect_to(
+      expenses_path(month: selected_month_param),
+      alert: "Expense not found."
+    )
   end
 
   def set_categories
     @categories = current_user.available_categories
   end
 
-  def filter_expenses(expenses)
-    if params[:category_id].present?
-      expenses = expenses.by_category(params[:category_id])
-    end
-
-    if params[:start_date].present? && params[:end_date].present?
-      expenses = expenses.by_date_range(params[:start_date], params[:end_date])
-    end
-
-    if params[:search].present?
-      expenses = expenses.search(params[:search])
-    end
-
-    expenses
-  end
-
-  def valid_category?
-    category = Category.find_by(id: expense_params[:category_id])
-    return false if category.nil?
-    category.system_category? || category.user_id == current_user.id
-  end
-
   def expense_params
-    params.require(:expense).permit(:amount, :expense_date, :description, :category_id)
-  end
-
-  def expense_params
-    params.require(:expense).permit(:amount, :expense_date, :description, :category_id)
-  end
-
-  # ============ MONTH STATS ============
-  def build_month_stats(scope)
-    # All expenses stored as positive amounts (expense tracker)
-    @month_total = scope.sum("ABS(amount)")
-    @month_count = scope.count
-
-    # Days elapsed in selected month
-    days = if @selected_date.beginning_of_month == Time.zone.today.beginning_of_month
-             Time.zone.today.day
-    else
-             @selected_date.end_of_month.day
-    end
-
-    # Averages
-    @avg_daily = days.positive? ? (@month_total / days.to_f).round(2) : 0
-    @avg_transaction = @month_count.positive? ? (@month_total / @month_count.to_f).round(2) : 0
-  end
-
-  # ============ YEAR STATS ============
-  def build_year_stats(today)
-    year_scope = current_user.expenses.where(
-      expense_date: today.beginning_of_year..today.end_of_year
+    params.require(:expense).permit(
+      :amount,
+      :expense_date,
+      :description,
+      :category_id
     )
-
-    @year_total = year_scope.sum("ABS(amount)")
-    @year_count = year_scope.count
-    @year_month_count = year_scope.distinct.count("EXTRACT(MONTH FROM expense_date)")
-    @year_avg_monthly = @year_month_count.positive? ? (@year_total / @year_month_count).round(2) : 0
   end
 
-  # ============ CATEGORY TOTALS ============
-  def build_category_totals(scope)
-    raw_totals = scope
-      .joins(:category)
-      .group(
-        "categories.id",
-        "categories.name",
-        "categories.icon",
-        "categories.color"
-      )
-      .sum("ABS(expenses.amount)")
-
-    @category_totals = raw_totals
-      .map do |(key, amount)|
-        _id, name, icon, color = key
-        [ name, { amount: amount.to_f, icon: icon, color: color } ]
-      end
-      .sort_by { |_, data| -data[:amount] }
-      .to_h
-
-    # Month total for percentage calculations (must match)
-    @month_total = @category_totals.values.sum { |d| d[:amount] }
-  end
-
+  # MONTH PARSING
   def parse_month(value)
-    return Date.current if value.blank?
-    Date.parse(value.to_s)
-  rescue Date::Error, TypeError
-    Date.current
+    return Date.current.beginning_of_month if value.blank?
+
+    Date.strptime(value.to_s, "%Y-%m").beginning_of_month
+  rescue ArgumentError, TypeError
+    Date.current.beginning_of_month
+  end
+
+  def selected_month_param
+    parse_month(params[:month]).strftime("%Y-%m")
   end
 end

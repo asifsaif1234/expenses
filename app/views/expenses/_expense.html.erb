@@ -1,70 +1,122 @@
 <!-- app/views/expenses/_expense.html.erb -->
-<div id="<%= dom_id(expense) %>" 
-     class="expense-item group px-6 py-4 hover:bg-gray-50 transition-colors">
+
+<div
+  id="<%= dom_id(expense) %>"
+  class="expense-item group px-6 py-4 hover:bg-gray-50 transition-colors"
+>
+
   <div class="flex items-center justify-between gap-3">
-    
-    <!-- Left: Icon + Description + Meta -->
+
+    <!-- Left -->
     <div class="flex items-center gap-3 min-w-0 flex-1">
+
       <!-- Category Icon -->
-      <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
-                  <%= expense.amount > 0 ? 'bg-green-50' : 'bg-red-50' %>">
-        <span class="text-lg leading-none"><%= expense.category&.icon || "📌" %></span>
+      <div
+        class="
+          w-10 h-10 rounded-xl
+          flex items-center justify-center
+          flex-shrink-0
+          <%= expense.amount.positive? ? 'bg-green-50' : 'bg-red-50' %>
+        "
+      >
+        <span class="text-lg leading-none">
+          <%= expense.category&.icon || "📌" %>
+        </span>
       </div>
-      
-      <!-- Description + Meta -->
+
+
+      <!-- Description -->
       <div class="min-w-0 flex-1">
+
         <p class="text-sm font-medium text-gray-900 truncate">
           <%= expense.description.presence || "Untitled Expense" %>
         </p>
+
         <div class="flex items-center gap-2 mt-0.5">
+
           <span class="text-xs text-gray-500">
             <%= expense.expense_date.strftime("%d %b, %Y") %>
           </span>
-          <span class="text-xs text-gray-300">•</span>
-          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium"
-                style="background-color: <%= expense.category&.color ? "#{expense.category.color}15" : '#f3f4f6' %>;
-                       color: <%= expense.category&.color || '#6b7280' %>;">
+
+          <span class="text-xs text-gray-300">
+            •
+          </span>
+
+          <span
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium"
+            style="
+              background-color: <%= expense.category&.color ? "#{expense.category.color}15" : '#f3f4f6' %>;
+              color: <%= expense.category&.color || '#6b7280' %>;
+            "
+          >
             <%= expense.category&.name || "Uncategorized" %>
           </span>
+
         </div>
+
       </div>
+
     </div>
-    
-    <!-- Right: Amount + Actions -->
+
+
+    <!-- Right -->
     <div class="flex items-center gap-3 flex-shrink-0">
+
       <!-- Amount -->
-      <span class="text-base font-semibold <%= expense.amount > 0 ? 'text-green-600' : 'text-red-600' %> tabular-nums">
-        <%= expense.amount > 0 ? '+' : '−' %>$<%= number_with_precision(expense.amount.abs, precision: 2) %>
+      <span
+        class="
+          text-base font-semibold
+          <%= expense.amount.positive? ? 'text-red-600' : 'text-red-600' %>
+          tabular-nums
+        "
+      >
+        $<%= number_with_precision(
+          expense.amount,
+          precision: 2,
+          delimiter: ","
+        ) %>
       </span>
 
-      <!-- Edit / Delete Actions - ALWAYS VISIBLE -->
+
+      <!-- Actions -->
       <div class="flex items-center gap-1">
-        <!-- Edit Button -->
-        <button type="button"
-                class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
-                title="Edit expense"
-                data-controller="modal-trigger"
-                data-action="click->modal-trigger#open"
-                data-modal-trigger-url="<%= edit_expense_path(expense) %>">
+
+        <!-- Edit -->
+        <button
+          type="button"
+          class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+          title="Edit expense"
+          data-controller="modal-trigger"
+          data-action="click->modal-trigger#open"
+          data-modal-trigger-url="<%= edit_expense_path(expense) %>"
+        >
           <i class="fas fa-pen text-xs"></i>
         </button>
 
-        <!-- Delete Button -->
-        <%= button_to expense_path(expense),
-            method: :delete,
-            form: { 
-              data: { 
-                turbo_confirm: "Delete this expense? This action cannot be undone.",
-                turbo: true
-              },
-              class: "inline"
+
+        <!-- Delete -->
+        <%= button_to(
+          expense_path(expense),
+          method: :delete,
+          form: {
+            data: {
+              turbo_confirm: "Delete this expense? This action cannot be undone.",
+              turbo: true
             },
-            class: "w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer",
-            title: "Delete expense" do %>
+            class: "inline"
+          },
+          class: "w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer",
+          title: "Delete expense"
+        ) do %>
+
           <i class="fas fa-trash text-xs"></i>
+
         <% end %>
+
       </div>
+
     </div>
-    
+
   </div>
+
 </div>

@@ -1,10 +1,16 @@
-
-
 <!-- app/views/expenses/create.turbo_stream.erb -->
-<%= turbo_stream.prepend "expenses_list", partial: "expenses/expense", locals: { expense: @expense } %>
 
-<%= turbo_stream.replace "flash_messages", partial: "shared/flash" %>
+<%= turbo_stream.replace(
+  "expenses_dashboard",
+  partial: "expenses/dashboard"
+) %>
 
-<script>
-  document.dispatchEvent(new CustomEvent("modal:close"));
-</script>
+<%= turbo_stream.replace(
+  "flash_messages",
+  partial: "shared/flash"
+) %>
+
+<%= turbo_stream.update(
+  "expense_modal",
+  ""
+) %>
