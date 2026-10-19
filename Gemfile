@@ -46,7 +46,7 @@ gem "thruster", require: false
 gem "devise"
 
 # Pagination
-gem "pagy", "~> 43.6"
+gem "pagy", "~> 43.7"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
